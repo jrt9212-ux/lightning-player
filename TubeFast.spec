@@ -1,18 +1,18 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 
+import sys, os
+py_dir = os.path.dirname(sys.executable)
+
 a = Analysis(
     ['app.py'],
     pathex=[],
     binaries=[
-        (r'C:\Windows\System32\vcruntime140.dll', '.'),
-        (r'C:\Windows\System32\vcruntime140_1.dll', '.'),
-        (r'C:\Windows\System32\msvcp140.dll', '.'),
-        (r'C:\Windows\System32\msvcp140_1.dll', '.'),
-        (r'C:\Windows\System32\msvcp140_2.dll', '.'),
+        (os.path.join(py_dir, 'vcruntime140.dll'), '.'),
+        (os.path.join(py_dir, 'vcruntime140_1.dll'), '.'),
     ],
     datas=[('client', 'client'), ('icon.ico', '.'), ('icon.png', '.'), ('categories_catalog.json', '.')],
-    hiddenimports=['webview', 'clr_loader', 'pythonnet', 'cffi'],
+    hiddenimports=['webview'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

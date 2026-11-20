@@ -290,9 +290,31 @@ def safe_close_window():
         if hwnd:
             user32.PostMessageW(hwnd, 0x0010, 0, 0)
 
+def set_window_icon(hwnd):
+    if not user32: return
+    try:
+        base_dir = get_base_dir()
+        icon_path = os.path.join(base_dir, "icon.ico")
+        if not os.path.exists(icon_path):
+            icon_path = os.path.abspath("icon.ico")
+        if os.path.exists(icon_path):
+            WM_SETICON = 0x0080
+            IMAGE_ICON = 1
+            LR_LOADFROMFILE = 0x0010
+            h_icon_big = user32.LoadImageW(None, icon_path, IMAGE_ICON, 0, 0, LR_LOADFROMFILE)
+            h_icon_small = user32.LoadImageW(None, icon_path, IMAGE_ICON, 16, 16, LR_LOADFROMFILE)
+            if h_icon_big:
+                user32.SendMessageW(hwnd, WM_SETICON, 1, h_icon_big)
+            if h_icon_small:
+                user32.SendMessageW(hwnd, WM_SETICON, 0, h_icon_small)
+            log(f"Applied custom lightning icon on HWND {hex(hwnd)}")
+    except Exception as e:
+        log(f"set_window_icon error: {e}")
+
 def strip_window_decorations(hwnd):
     if not user32: return
     try:
+        set_window_icon(hwnd)
         GWL_STYLE = -16
         WS_CAPTION = 0x00C00000
         WS_SYSMENU = 0x00080000

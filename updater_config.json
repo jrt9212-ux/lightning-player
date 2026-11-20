@@ -2,5 +2,5 @@
   "github_repo": "jrt9212-ux/lightning-player",
   "update_url": "",
   "auto_check": true,
-  "auto_apply": false
+  "auto_apply": true
 }

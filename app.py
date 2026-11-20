@@ -79,7 +79,7 @@ IS_MAXIMIZED = False
 CLOSING = False
 CLOSING_LOCK = threading.Lock()
 
-APP_VERSION = "1.0.0"
+APP_VERSION = "1.0.1"
 
 UPDATE_STATE = {
     "current_version": APP_VERSION,
@@ -608,46 +608,57 @@ def get_smart_recommendations(seed_id, seed_title, seed_artist, source="youtube"
             if len(sampled_taste) >= sample_k:
                 break
 
-    queries = []
+    # Build queries for BOTH Spotify and YouTube catalogs to guarantee a 50/50 balance
+    sp_queries = []
+    yt_queries = []
 
-    seed_flavors = [
-        f"{primary_seed} radio mix",
-        f"{primary_seed} greatest hits songs",
-        f"artists similar to {primary_seed} songs",
-        f"{primary_seed} playlist mix"
-    ]
-    random.shuffle(seed_flavors)
     if primary_seed and primary_seed.lower() != "unknown artist":
-        queries.append((seed_flavors[0], "seed"))
-        if len(seed_flavors) > 1:
-            queries.append((seed_flavors[1], "seed"))
+        sp_queries.append(primary_seed)
+        if clean_title:
+            sp_queries.append(f"{primary_seed} {clean_title}")
+        yt_queries.append(f"{primary_seed} official audio")
+        yt_queries.append(f"{primary_seed} songs")
+    else:
+        sp_queries.append("top hits")
+        yt_queries.append("popular music songs")
 
     if secondary_seeds:
-        queries.append((f"{secondary_seeds[0]} radio mix", "feature"))
+        sp_queries.append(secondary_seeds[0])
+        yt_queries.append(f"{secondary_seeds[0]} songs")
 
     for tfav in sampled_taste:
-        queries.append((f"{tfav} radio mix", "taste"))
+        sp_queries.append(tfav)
+        yt_queries.append(f"{tfav} songs")
 
-    if not queries:
-        queries.append((f"hip hop trap radio mix", "seed"))
+    raw_sp = []
+    raw_yt = []
 
-    def fetch_query(q_item):
-        q, kind = q_item
-        res = search_youtube(q, max_results=8) if source != "spotify" else search_spotify(q, max_results=8)
-        return (res, kind, q)
+    def run_sp(q):
+        try:
+            return search_spotify(q, max_results=8)
+        except Exception:
+            return []
 
-    candidates_by_kind = {"seed": [], "feature": [], "taste": []}
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-        futures = [executor.submit(fetch_query, item) for item in queries]
-        for f in concurrent.futures.as_completed(futures, timeout=4.0):
+    def run_yt(q):
+        try:
+            return search_youtube(q, max_results=8)
+        except Exception:
+            return []
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
+        f_sp = [executor.submit(run_sp, q) for q in sp_queries[:3]]
+        f_yt = [executor.submit(run_yt, q) for q in yt_queries[:3]]
+
+        for f in concurrent.futures.as_completed(f_sp, timeout=4.0):
             try:
-                res, kind, q = f.result()
-                candidates_by_kind[kind].extend(res)
-            except Exception as e:
-                log(f"Parallel recommendation subquery error: {e}")
-
-    if not any(candidates_by_kind.values()):
-        candidates_by_kind["seed"].extend(FEATURED_TRACKS)
+                raw_sp.extend(f.result())
+            except Exception:
+                pass
+        for f in concurrent.futures.as_completed(f_yt, timeout=4.0):
+            try:
+                raw_yt.extend(f.result())
+            except Exception:
+                pass
 
     seen_ids = set(exclude_ids or [])
     if seed_id:
@@ -656,7 +667,6 @@ def get_smart_recommendations(seed_id, seed_title, seed_artist, source="youtube"
     seed_keys = get_song_title_keys(seed_title, seed_artist)
     seen_title_keys.update(seed_keys)
 
-    # Exclude all recently played tracks so earlier session songs are never repeated
     try:
         lib = load_library_from_disk()
         for item in lib.get("history", [])[:30]:
@@ -668,8 +678,8 @@ def get_smart_recommendations(seed_id, seed_title, seed_artist, source="youtube"
         pass
 
     def is_valid_song_duration(dur_str):
-        if not dur_str or dur_str == "Live":
-            return False
+        if not dur_str or dur_str == "Live" or dur_str == "Studio":
+            return True
         parts = str(dur_str).split(":")
         if len(parts) >= 3:
             return False
@@ -690,7 +700,6 @@ def get_smart_recommendations(seed_id, seed_title, seed_artist, source="youtube"
         for c in raw_list:
             cid = c.get("id")
             cdur = c.get("duration")
-            # Strictly filter out unplayable live streams, long mixes (>12 min), or dead tracks
             if not cid or cid in DEAD_TRACK_CACHE or not is_valid_song_duration(cdur):
                 continue
             if cid in seen_ids:
@@ -698,7 +707,6 @@ def get_smart_recommendations(seed_id, seed_title, seed_artist, source="youtube"
 
             c_keys = get_song_title_keys(c.get("title", ""), c.get("artist", ""))
             if is_duplicate_song(c_keys, seen_title_keys):
-                log(f"Excluded duplicate song variant: '{c.get('title')}' (matches existing song)")
                 continue
 
             seen_ids.add(cid)
@@ -706,39 +714,49 @@ def get_smart_recommendations(seed_id, seed_title, seed_artist, source="youtube"
             cleaned.append(c)
         return cleaned
 
-    seed_pool = process_bucket(candidates_by_kind["seed"])
-    taste_pool = process_bucket(candidates_by_kind["taste"])
-    feat_pool = process_bucket(candidates_by_kind["feature"])
+    sp_pool = process_bucket(raw_sp)
+    yt_pool = process_bucket(raw_yt)
 
-    random.shuffle(seed_pool)
-    random.shuffle(taste_pool)
-    random.shuffle(feat_pool)
+    # Backfill if either pool is small to ensure robust 50/50 balance
+    if len(sp_pool) < 6:
+        sp_pool.extend(process_bucket(SPOTIFY_FEATURED))
+    if len(yt_pool) < 6:
+        yt_pool.extend(process_bucket(YOUTUBE_FEATURED))
 
+    random.shuffle(sp_pool)
+    random.shuffle(yt_pool)
+
+    # Assign informative reasons
+    for c in sp_pool:
+        cartist = (c.get("artist") or "").lower()
+        if primary_seed and primary_seed.lower() in cartist:
+            c["reason"] = f"Spotify • More from {primary_seed}"
+        else:
+            c["reason"] = f"Spotify • Similar to {primary_seed}" if primary_seed else "Spotify • Top hit"
+
+    for c in yt_pool:
+        cartist = (c.get("artist") or "").lower()
+        if primary_seed and primary_seed.lower() in cartist:
+            c["reason"] = f"YouTube • More from {primary_seed}"
+        else:
+            c["reason"] = f"YouTube • Similar to {primary_seed}" if primary_seed else "YouTube • Trending"
+
+    # Perfect 50/50 interleaving balance (Spotify mode: SP, YT, SP, YT... / YT mode: YT, SP, YT, SP...)
     interleaved = []
-    while seed_pool or taste_pool or feat_pool:
-        if seed_pool:
-            c = seed_pool.pop(0)
-            cartist = (c.get("artist") or "").lower()
-            if primary_seed and primary_seed.lower() in cartist:
-                c["reason"] = f"More from {primary_seed}"
-            else:
-                c["reason"] = f"Similar to {primary_seed}" if primary_seed else "Recommended for you"
+    first_pool = sp_pool if source == "spotify" else yt_pool
+    second_pool = yt_pool if source == "spotify" else sp_pool
+
+    while first_pool or second_pool:
+        if first_pool:
+            c = first_pool.pop(0)
+            interleaved.append(c)
+            RECENT_RECOMMENDED_IDS.append(c["id"])
+        if second_pool:
+            c = second_pool.pop(0)
             interleaved.append(c)
             RECENT_RECOMMENDED_IDS.append(c["id"])
 
-        if taste_pool:
-            c = taste_pool.pop(0)
-            c["reason"] = "Based on your music style"
-            interleaved.append(c)
-            RECENT_RECOMMENDED_IDS.append(c["id"])
-
-        if feat_pool:
-            c = feat_pool.pop(0)
-            c["reason"] = f"Featuring artist"
-            interleaved.append(c)
-            RECENT_RECOMMENDED_IDS.append(c["id"])
-
-    return interleaved
+    return interleaved[:20]
 
 def log(msg):
     try:
@@ -863,51 +881,51 @@ YOUTUBE_FEATURED = [
         "source": "youtube"
     },
     {
-        "id": "SlPhMPnQ58k",
+        "id": "tvTRZJ-4EyI",
+        "title": "HUMBLE.",
+        "artist": "Kendrick Lamar",
+        "duration": "3:04",
+        "thumbnail": "https://i.ytimg.com/vi/tvTRZJ-4EyI/hqdefault.jpg",
+        "source": "youtube"
+    },
+    {
+        "id": "aWb8z-KhZdo",
         "title": "Mask Off",
         "artist": "Future",
-        "duration": "3:15",
-        "thumbnail": "https://i.ytimg.com/vi/SlPhMPnQ58k/hqdefault.jpg",
+        "duration": "3:24",
+        "thumbnail": "https://i.ytimg.com/vi/aWb8z-KhZdo/hqdefault.jpg",
         "source": "youtube"
     },
     {
-        "id": "d9MyW72ELq0",
-        "title": "Drip Too Hard",
-        "artist": "Lil Baby & Gunna",
-        "duration": "2:28",
-        "thumbnail": "https://i.ytimg.com/vi/d9MyW72ELq0/hqdefault.jpg",
-        "source": "youtube"
-    },
-    {
-        "id": "kTJczUoc26U",
-        "title": "SICKO MODE",
-        "artist": "Travis Scott",
-        "duration": "2:38",
-        "thumbnail": "https://i.ytimg.com/vi/kTJczUoc26U/hqdefault.jpg",
-        "source": "youtube"
-    },
-    {
-        "id": "KQ6zr6kCPj8",
-        "title": "Pop Out",
-        "artist": "Polo G ft. Lil Tjay",
-        "duration": "6:16",
-        "thumbnail": "https://i.ytimg.com/vi/KQ6zr6kCPj8/hqdefault.jpg",
-        "source": "youtube"
-    },
-    {
-        "id": "xvZqHgFz51I",
-        "title": "God's Plan",
-        "artist": "Drake",
-        "duration": "4:50",
-        "thumbnail": "https://i.ytimg.com/vi/xvZqHgFz51I/hqdefault.jpg",
-        "source": "youtube"
-    },
-    {
-        "id": "7-7knsP2n5w",
+        "id": "ZBOoVj6IW3s",
         "title": "Life Is Good",
         "artist": "Future ft. Drake",
-        "duration": "3:30",
-        "thumbnail": "https://i.ytimg.com/vi/7-7knsP2n5w/hqdefault.jpg",
+        "duration": "3:59",
+        "thumbnail": "https://i.ytimg.com/vi/ZBOoVj6IW3s/hqdefault.jpg",
+        "source": "youtube"
+    },
+    {
+        "id": "m1a_GqJf02M",
+        "title": "God's Plan",
+        "artist": "Drake",
+        "duration": "3:19",
+        "thumbnail": "https://i.ytimg.com/vi/m1a_GqJf02M/hqdefault.jpg",
+        "source": "youtube"
+    },
+    {
+        "id": "R0ykLlhg0AQ",
+        "title": "Money in the Grave",
+        "artist": "Drake ft. Rick Ross",
+        "duration": "4:18",
+        "thumbnail": "https://i.ytimg.com/vi/R0ykLlhg0AQ/hqdefault.jpg",
+        "source": "youtube"
+    },
+    {
+        "id": "d-JBBNg8YKs",
+        "title": "SICKO MODE",
+        "artist": "Travis Scott",
+        "duration": "5:14",
+        "thumbnail": "https://i.ytimg.com/vi/d-JBBNg8YKs/hqdefault.jpg",
         "source": "youtube"
     },
     {
@@ -919,19 +937,11 @@ YOUTUBE_FEATURED = [
         "source": "youtube"
     },
     {
-        "id": "ov4WobPqoSA",
-        "title": "HUMBLE.",
-        "artist": "Kendrick Lamar",
-        "duration": "2:57",
-        "thumbnail": "https://i.ytimg.com/vi/ov4WobPqoSA/hqdefault.jpg",
-        "source": "youtube"
-    },
-    {
-        "id": "rBRTamq0v-Q",
-        "title": "Outside Today",
-        "artist": "NBA YoungBoy",
-        "duration": "2:09",
-        "thumbnail": "https://i.ytimg.com/vi/rBRTamq0v-Q/hqdefault.jpg",
+        "id": "THcVOf1kNh0",
+        "title": "Drip Too Hard",
+        "artist": "Lil Baby & Gunna",
+        "duration": "2:27",
+        "thumbnail": "https://i.ytimg.com/vi/THcVOf1kNh0/hqdefault.jpg",
         "source": "youtube"
     },
     {
@@ -943,35 +953,43 @@ YOUTUBE_FEATURED = [
         "source": "youtube"
     },
     {
+        "id": "hLw4qUBfhVY",
+        "title": "Pop Out",
+        "artist": "Polo G ft. Lil Tjay",
+        "duration": "2:45",
+        "thumbnail": "https://i.ytimg.com/vi/hLw4qUBfhVY/hqdefault.jpg",
+        "source": "youtube"
+    },
+    {
+        "id": "rBRTamq0v-Q",
+        "title": "Outside Today",
+        "artist": "NBA YoungBoy",
+        "duration": "2:09",
+        "thumbnail": "https://i.ytimg.com/vi/rBRTamq0v-Q/hqdefault.jpg",
+        "source": "youtube"
+    },
+    {
         "id": "83xBPCw5hh4",
         "title": "ROCKSTAR",
-        "artist": "DaBaby",
+        "artist": "DaBaby ft. Roddy Ricch",
         "duration": "3:02",
         "thumbnail": "https://i.ytimg.com/vi/83xBPCw5hh4/hqdefault.jpg",
         "source": "youtube"
     },
     {
         "id": "4GFAZBKZVJY",
-        "title": "Rockstar",
-        "artist": "Post Malone 21 Savage",
+        "title": "rockstar",
+        "artist": "Post Malone ft. 21 Savage",
         "duration": "3:38",
         "thumbnail": "https://i.ytimg.com/vi/4GFAZBKZVJY/hqdefault.jpg",
         "source": "youtube"
     },
     {
-        "id": "aYr4fDuLhXg",
-        "title": "Without Me",
-        "artist": "Halsey",
-        "duration": "3:24",
-        "thumbnail": "https://i.ytimg.com/vi/aYr4fDuLhXg/hqdefault.jpg",
-        "source": "youtube"
-    },
-    {
-        "id": "m_DG4shGECI",
+        "id": "R8vpQdZErbw",
         "title": "Congratulations",
-        "artist": "Post Malone Quavo",
-        "duration": "3:47",
-        "thumbnail": "https://i.ytimg.com/vi/m_DG4shGECI/hqdefault.jpg",
+        "artist": "Post Malone ft. Quavo",
+        "duration": "3:40",
+        "thumbnail": "https://i.ytimg.com/vi/R8vpQdZErbw/hqdefault.jpg",
         "source": "youtube"
     },
     {
@@ -983,94 +1001,118 @@ YOUTUBE_FEATURED = [
         "source": "youtube"
     },
     {
-        "id": "coAxNHhGfuA",
-        "title": "Money in the Grave",
-        "artist": "Drake Rick Ross",
-        "duration": "3:26",
-        "thumbnail": "https://i.ytimg.com/vi/coAxNHhGfuA/hqdefault.jpg",
+        "id": "aYr4fDuLhXg",
+        "title": "Without Me",
+        "artist": "Halsey",
+        "duration": "3:24",
+        "thumbnail": "https://i.ytimg.com/vi/aYr4fDuLhXg/hqdefault.jpg",
         "source": "youtube"
     }
 ]
 
 SPOTIFY_FEATURED = [
     {
-        "id": "34Na4j8AVgA",
+        "id": "Rif-RTvmmss",
         "title": "Starboy",
         "artist": "The Weeknd",
-        "duration": "4:33",
-        "thumbnail": "https://i.ytimg.com/vi/34Na4j8AVgA/hqdefault.jpg",
+        "duration": "3:51",
+        "thumbnail": "https://i.ytimg.com/vi/Rif-RTvmmss/hqdefault.jpg",
         "source": "spotify"
     },
     {
-        "id": "CevxZvSJLk8",
-        "title": "Roar",
-        "artist": "Katy Perry",
-        "duration": "4:29",
-        "thumbnail": "https://i.ytimg.com/vi/CevxZvSJLk8/hqdefault.jpg",
-        "source": "spotify"
-    },
-    {
-        "id": "hT_nvWreIhg",
+        "id": "fHI8X4OXluQ",
         "title": "Blinding Lights",
         "artist": "The Weeknd",
-        "duration": "4:43",
-        "thumbnail": "https://i.ytimg.com/vi/hT_nvWreIhg/hqdefault.jpg",
+        "duration": "3:23",
+        "thumbnail": "https://i.ytimg.com/vi/fHI8X4OXluQ/hqdefault.jpg",
         "source": "spotify"
     },
     {
-        "id": "lp-EO5I60KA",
-        "title": "Levitating",
-        "artist": "Dua Lipa",
-        "duration": "4:49",
-        "thumbnail": "https://i.ytimg.com/vi/lp-EO5I60KA/hqdefault.jpg",
-        "source": "spotify"
-    },
-    {
-        "id": "I3FBJdiExcg",
-        "title": "Watermelon Sugar",
-        "artist": "Harry Styles",
-        "duration": "38:16",
-        "thumbnail": "https://i.ytimg.com/vi/I3FBJdiExcg/hqdefault.jpg",
-        "source": "spotify"
-    },
-    {
-        "id": "nfWlot6h_JM",
-        "title": "Shake It Off",
-        "artist": "Taylor Swift",
-        "duration": "4:02",
-        "thumbnail": "https://i.ytimg.com/vi/nfWlot6h_JM/hqdefault.jpg",
-        "source": "spotify"
-    },
-    {
-        "id": "4NRXx6U8ABQ",
-        "title": "Say So",
-        "artist": "Doja Cat",
-        "duration": "4:23",
-        "thumbnail": "https://i.ytimg.com/vi/4NRXx6U8ABQ/hqdefault.jpg",
-        "source": "spotify"
-    },
-    {
-        "id": "F90Cw4l-8NY",
-        "title": "Kill Bill",
-        "artist": "SZA",
-        "duration": "3:53",
-        "thumbnail": "https://i.ytimg.com/vi/F90Cw4l-8NY/hqdefault.jpg",
-        "source": "spotify"
-    },
-    {
-        "id": "pB-5XG-DbAA",
-        "title": "Stay",
-        "artist": "The Kid LAROI Justin Bieber",
-        "duration": "3:30",
-        "thumbnail": "https://i.ytimg.com/vi/pB-5XG-DbAA/hqdefault.jpg",
-        "source": "spotify"
-    },
-    {
-        "id": "b1kbLwvqugk",
+        "id": "u6lihZAcy4s",
         "title": "Save Your Tears",
         "artist": "The Weeknd",
-        "duration": "5:09",
-        "thumbnail": "https://i.ytimg.com/vi/b1kbLwvqugk/hqdefault.jpg",
+        "duration": "3:37",
+        "thumbnail": "https://i.ytimg.com/vi/u6lihZAcy4s/hqdefault.jpg",
+        "source": "spotify"
+    },
+    {
+        "id": "WHuBW3qKm9g",
+        "title": "Levitating",
+        "artist": "Dua Lipa",
+        "duration": "3:41",
+        "thumbnail": "https://i.ytimg.com/vi/WHuBW3qKm9g/hqdefault.jpg",
+        "source": "spotify"
+    },
+    {
+        "id": "7-x3uD5z1bQ",
+        "title": "Watermelon Sugar",
+        "artist": "Harry Styles",
+        "duration": "2:54",
+        "thumbnail": "https://i.ytimg.com/vi/7-x3uD5z1bQ/hqdefault.jpg",
+        "source": "spotify"
+    },
+    {
+        "id": "V1Z586zoeeE",
+        "title": "As It Was",
+        "artist": "Harry Styles",
+        "duration": "2:46",
+        "thumbnail": "https://i.ytimg.com/vi/V1Z586zoeeE/hqdefault.jpg",
+        "source": "spotify"
+    },
+    {
+        "id": "YD4utuFiexw",
+        "title": "bad guy",
+        "artist": "Billie Eilish",
+        "duration": "3:14",
+        "thumbnail": "https://i.ytimg.com/vi/YD4utuFiexw/hqdefault.jpg",
+        "source": "spotify"
+    },
+    {
+        "id": "tNJhkrpLGT8",
+        "title": "drivers license",
+        "artist": "Olivia Rodrigo",
+        "duration": "4:02",
+        "thumbnail": "https://i.ytimg.com/vi/tNJhkrpLGT8/hqdefault.jpg",
+        "source": "spotify"
+    },
+    {
+        "id": "aeDdS9aIpck",
+        "title": "good 4 u",
+        "artist": "Olivia Rodrigo",
+        "duration": "2:58",
+        "thumbnail": "https://i.ytimg.com/vi/aeDdS9aIpck/hqdefault.jpg",
+        "source": "spotify"
+    },
+    {
+        "id": "SQnc1QibapQ",
+        "title": "Kill Bill",
+        "artist": "SZA",
+        "duration": "2:36",
+        "thumbnail": "https://i.ytimg.com/vi/SQnc1QibapQ/hqdefault.jpg",
+        "source": "spotify"
+    },
+    {
+        "id": "uAYG46w1SCA",
+        "title": "Say So",
+        "artist": "Doja Cat",
+        "duration": "3:59",
+        "thumbnail": "https://i.ytimg.com/vi/uAYG46w1SCA/hqdefault.jpg",
+        "source": "spotify"
+    },
+    {
+        "id": "Qb8q4ijHk_M",
+        "title": "Stay",
+        "artist": "The Kid LAROI",
+        "duration": "2:21",
+        "thumbnail": "https://i.ytimg.com/vi/Qb8q4ijHk_M/hqdefault.jpg",
+        "source": "spotify"
+    },
+    {
+        "id": "ay9y3CTkT40",
+        "title": "Peaches",
+        "artist": "Justin Bieber",
+        "duration": "3:18",
+        "thumbnail": "https://i.ytimg.com/vi/ay9y3CTkT40/hqdefault.jpg",
         "source": "spotify"
     },
     {
@@ -1082,19 +1124,35 @@ SPOTIFY_FEATURED = [
         "source": "spotify"
     },
     {
-        "id": "DyDfgMOUjCI",
-        "title": "bad guy",
-        "artist": "Billie Eilish",
-        "duration": "3:26",
-        "thumbnail": "https://i.ytimg.com/vi/DyDfgMOUjCI/hqdefault.jpg",
+        "id": "k0TEcUm7lTk",
+        "title": "Shake It Off",
+        "artist": "Taylor Swift",
+        "duration": "3:39",
+        "thumbnail": "https://i.ytimg.com/vi/k0TEcUm7lTk/hqdefault.jpg",
         "source": "spotify"
     },
     {
-        "id": "ZmDBbnmKpqQ",
-        "title": "drivers license",
-        "artist": "Olivia Rodrigo",
-        "duration": "4:07",
-        "thumbnail": "https://i.ytimg.com/vi/ZmDBbnmKpqQ/hqdefault.jpg",
+        "id": "CevxZvSJLk8",
+        "title": "Roar",
+        "artist": "Katy Perry",
+        "duration": "4:29",
+        "thumbnail": "https://i.ytimg.com/vi/CevxZvSJLk8/hqdefault.jpg",
+        "source": "spotify"
+    },
+    {
+        "id": "KT7F15T9VBI",
+        "title": "Heat Waves",
+        "artist": "Glass Animals",
+        "duration": "3:58",
+        "thumbnail": "https://i.ytimg.com/vi/KT7F15T9VBI/hqdefault.jpg",
+        "source": "spotify"
+    },
+    {
+        "id": "OiMWFojB9Ok",
+        "title": "Dynamite",
+        "artist": "BTS",
+        "duration": "3:20",
+        "thumbnail": "https://i.ytimg.com/vi/OiMWFojB9Ok/hqdefault.jpg",
         "source": "spotify"
     },
     {
@@ -1108,49 +1166,9 @@ SPOTIFY_FEATURED = [
     {
         "id": "Aztdmq1tYY8",
         "title": "EARFQUAKE",
-        "artist": "Tyler the Creator",
+        "artist": "Tyler, the Creator",
         "duration": "3:10",
         "thumbnail": "https://i.ytimg.com/vi/Aztdmq1tYY8/hqdefault.jpg",
-        "source": "spotify"
-    },
-    {
-        "id": "WgiWUnJqy3k",
-        "title": "Heat Waves",
-        "artist": "Glass Animals",
-        "duration": "4:00",
-        "thumbnail": "https://i.ytimg.com/vi/WgiWUnJqy3k/hqdefault.jpg",
-        "source": "spotify"
-    },
-    {
-        "id": "aeDdS9aIpck",
-        "title": "good 4 u",
-        "artist": "Olivia Rodrigo",
-        "duration": "2:58",
-        "thumbnail": "https://i.ytimg.com/vi/aeDdS9aIpck/hqdefault.jpg",
-        "source": "spotify"
-    },
-    {
-        "id": "OiMWFojB9Ok",
-        "title": "Dynamite",
-        "artist": "BTS",
-        "duration": "3:20",
-        "thumbnail": "https://i.ytimg.com/vi/OiMWFojB9Ok/hqdefault.jpg",
-        "source": "spotify"
-    },
-    {
-        "id": "tQ0yjYUFKAE",
-        "title": "Peaches",
-        "artist": "Justin Bieber",
-        "duration": "3:18",
-        "thumbnail": "https://i.ytimg.com/vi/tQ0yjYUFKAE/hqdefault.jpg",
-        "source": "spotify"
-    },
-    {
-        "id": "V1Z586zoeeE",
-        "title": "As It Was",
-        "artist": "Harry Styles",
-        "duration": "2:46",
-        "thumbnail": "https://i.ytimg.com/vi/V1Z586zoeeE/hqdefault.jpg",
         "source": "spotify"
     }
 ]

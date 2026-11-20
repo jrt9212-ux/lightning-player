@@ -393,6 +393,12 @@
       elements.searchInput.placeholder = 'Search Spotify songs, artists, or paste link...';
     }
 
+    // Refresh smart queue when source switches so next song recommendation matches active mode
+    smartAutoplayQueue = [];
+    preloadedTrack = null;
+    isStandbyReady = false;
+    replenishSmartQueue(true);
+
     const query = elements.searchInput.value.trim();
     if (query) {
       executeSearch(query);
@@ -891,7 +897,7 @@
         seed_id: cur ? cur.id : '',
         seed_title: cur ? cur.title : '',
         seed_artist: cur ? cur.artist : '',
-        source: cur ? cur.source : 'youtube',
+        source: state.activeSource || (cur ? cur.source : 'youtube'),
         exclude_ids: exclude
       });
 

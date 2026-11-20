@@ -135,3 +135,25 @@ Run the compiled standalone executable directly (no browser tabs, no terminal re
 - [ ] **Floating Glowing Update Banner:** When a newer release tag is detected (e.g. `v1.0.1`), a neon blue/purple update banner slides into the UI displaying release notes and download progress.
 - [ ] **In-Memory / In-Place Swapper:** Downloads the new executable to a temporary file, prepares a detached Windows `.bat` supervisor, and smoothly closes `Lightning Player.exe`.
 - [ ] **Instant Zero-Click Reopening:** The supervisor moves the new binary directly into `Lightning Player.exe`, launches it immediately, and cleans up temporary files so users resume playback on the updated build with zero manual re-installation.
+
+### P. Exact Studio Audio Verification for Spotify & YouTube Discovery
+- [ ] **100% Authentic Audio:** Every track in Spotify Discovery has been replaced with the verified official studio audio:
+  - *The Weeknd - Blinding Lights* (`fHI8X4OXluQ`, 3:23 official audio — no more Counting Stars)
+  - *The Weeknd - Starboy ft. Daft Punk* (`Rif-RTvmmss`, 3:51 official audio)
+  - *The Weeknd - Save Your Tears* (`u6lihZAcy4s`, 3:37 official audio)
+  - *Harry Styles - Watermelon Sugar* (`7-x3uD5z1bQ`, 2:54 official audio — no more Titanic tutorial video)
+  - *The Kid LAROI, Justin Bieber - Stay* (`Qb8q4ijHk_M`, 2:21 official audio)
+  - *Travis Scott - SICKO MODE* (`d-JBBNg8YKs`, 5:14 official audio)
+  - *Lil Baby & Gunna - Drip Too Hard* (`THcVOf1kNh0`, 2:27 official audio)
+  - *Kendrick Lamar - HUMBLE.* (`tvTRZJ-4EyI`, 3:04 official audio)
+  - *Future - Mask Off* (`aWb8z-KhZdo`, 3:24 official audio)
+- [ ] **Zero Mismatches:** All 40 discovery tracks play the exact, expected song from the genuine artist.
+
+### Q. Balanced 50/50 Next-Song Recommendations
+- [ ] **Balanced Queue:** In Spotify mode (and YouTube mode), upcoming tracks are not heavily populated with just YouTube tracks.
+- [ ] **1:1 Interleaved Mix:** Next songs strictly alternate between authentic Spotify catalog hits (with green Spotify badge) and YouTube tracks (with red YouTube badge):
+  - Next Song 1: Spotify
+  - Next Song 2: YouTube
+  - Next Song 3: Spotify
+  - Next Song 4: YouTube
+- [ ] **Zero Playback Failure:** Pre-resolution chamber verifies and pre-buffers Spotify candidates so transition to next track is instantaneous.

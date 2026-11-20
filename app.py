@@ -1195,9 +1195,39 @@ SPOTIFY_FEATURED = [
     }
 ]
 
-# Legacy combined list (used in recommendation seeding)
+# Combined list (used in recommendation seeding & catalog resolution)
 FEATURED_TRACKS = YOUTUBE_FEATURED + SPOTIFY_FEATURED
-FEATURED_TRACK_IDS = {t["id"] for t in FEATURED_TRACKS if t.get("id")}
+
+CATEGORIES_CATALOG = None
+
+def load_categories_catalog():
+    global CATEGORIES_CATALOG
+    if CATEGORIES_CATALOG is not None:
+        return CATEGORIES_CATALOG
+    base_dir = get_base_dir()
+    target = os.path.join(base_dir, "categories_catalog.json")
+    if not os.path.exists(target):
+        target = os.path.abspath("categories_catalog.json")
+    if os.path.exists(target):
+        try:
+            with open(target, "r", encoding="utf-8") as f:
+                CATEGORIES_CATALOG = json.load(f)
+                return CATEGORIES_CATALOG
+        except Exception as e:
+            log(f"Error loading categories_catalog.json: {e}")
+    return {"spotify": {}, "youtube": {}}
+
+def get_all_catalog_track_ids():
+    ids = {t["id"] for t in FEATURED_TRACKS if t.get("id")}
+    cat = load_categories_catalog()
+    for plat in ["spotify", "youtube"]:
+        for cdata in cat.get(plat, {}).values():
+            for t in cdata.get("tracks", []):
+                if t.get("id"):
+                    ids.add(t["id"])
+    return ids
+
+FEATURED_TRACK_IDS = get_all_catalog_track_ids()
 load_dead_cache()
 
 def search_youtube(query, max_results=15):
@@ -1513,6 +1543,48 @@ class DualStreamHandler(http.server.SimpleHTTPRequestHandler):
                 except Exception:
                     pass
                 return
+
+        # 2a. Discover endpoint with 5 categories (25 songs each) + dynamic personalized "For You"
+        if parsed.path == "/api/discover":
+            src = params.get("source", ["youtube"])[0].lower()
+            catalog = load_categories_catalog()
+            platform_cats = catalog.get(src, {})
+
+            lib = load_library_from_disk()
+            taste = lib.get("taste_profile", {}).get("artists", {})
+            history = lib.get("history", [])
+
+            top_artists = sorted(taste.keys(), key=lambda a: taste[a], reverse=True)
+            seed_artist = top_artists[0] if top_artists else ""
+            seed_title = history[0].get("title", "") if history else ""
+
+            if not seed_artist:
+                seed_artist = "The Weeknd" if src == "spotify" else "Travis Scott"
+
+            for_you_tracks = get_smart_recommendations(
+                seed_id="",
+                seed_title=seed_title,
+                seed_artist=seed_artist,
+                source=src,
+                exclude_ids=[]
+            )
+
+            reason_str = f"Based on your listening to {seed_artist}" if top_artists else f"Curated trending picks for you"
+            body = json.dumps({
+                "source": src,
+                "for_you": for_you_tracks[:15],
+                "for_you_reason": reason_str,
+                "categories": platform_cats,
+                "dead_tracks": list(DEAD_TRACK_CACHE)
+            }, ensure_ascii=False).encode("utf-8")
+
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
 
         # 2. Popular / Initial tracks
         if parsed.path == "/api/popular":

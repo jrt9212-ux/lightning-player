@@ -1,0 +1,2441 @@
+{
+  "spotify": {
+    "pop_hits": {
+      "name": "Pop & Top 40 Hits",
+      "icon": "🌟",
+      "tracks": [
+        {
+          "id": "sp-1363310482",
+          "title": "Call Out My Name",
+          "artist": "The Weeknd",
+          "album": "My Dear Melancholy,",
+          "duration": "3:48",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/2a/aa/b4/2aaab42a-a4cb-a600-4a25-d78961495960/18UMGIM17204.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        },
+        {
+          "id": "sp-1440872304",
+          "title": "Die For You",
+          "artist": "The Weeknd",
+          "album": "Starboy",
+          "duration": "4:20",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/e2/61/f8/e261f8c1-73db-9a7a-c89e-1068f19970e0/16UMGIM67863.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        },
+        {
+          "id": "sp-1693891139",
+          "title": "One Of The Girls",
+          "artist": "The Weeknd, JENNIE & Lily Rose Depp",
+          "album": "The Idol Episode 4 (Music from the HBO Original Series) - Single",
+          "duration": "4:04",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/db/28/e7/db28e7c3-f53a-76c8-eaa4-d92a22e4f160/23UMGIM72115.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        },
+        {
+          "id": "sp-1228739609",
+          "title": "New Rules",
+          "artist": "Dua Lipa",
+          "album": "Dua Lipa (Deluxe)",
+          "duration": "3:29",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/c1/54/2d/c1542d45-c6c2-12ca-7308-6eacd762c562/190295807870.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        },
+        {
+          "id": "sp-1538003843",
+          "title": "Levitating",
+          "artist": "Dua Lipa",
+          "album": "Future Nostalgia",
+          "duration": "3:23",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/6c/11/d6/6c11d681-aa3a-d59e-4c2e-f77e181026ab/190295092665.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        },
+        {
+          "id": "sp-1689238922",
+          "title": "Dance The Night",
+          "artist": "Dua Lipa",
+          "album": "Barbie The Album",
+          "duration": "2:56",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/c0/54/97/c05497aa-c19f-bf4f-de29-71edf30fbefb/075679688767.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        },
+        {
+          "id": "sp-6805877227",
+          "title": "Training Season",
+          "artist": "Dua Lipa",
+          "album": "Training Season's Over - EP",
+          "duration": "3:29",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/2d/1d/86/2d1d8629-34d0-f8f6-ffe8-2eca20741d33/1200214922771.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        },
+        {
+          "id": "sp-1226034393",
+          "title": "Sign of the Times",
+          "artist": "Harry Styles",
+          "album": "Harry Styles",
+          "duration": "5:40",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/3d/5e/aa/3d5eaaa3-9a86-c264-5cd5-7fac83f99a59/886446451978.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        },
+        {
+          "id": "sp-1870984045",
+          "title": "Coming Up Roses",
+          "artist": "Harry Styles",
+          "album": "Kiss All The Time. Disco, Occasionally.",
+          "duration": "4:08",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/07/41/6a/07416a78-38b9-2d47-7ce8-8a52a44c510f/196874010112.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        },
+        {
+          "id": "sp-1615585008",
+          "title": "As It Was",
+          "artist": "Harry Styles",
+          "album": "Harry's House",
+          "duration": "2:47",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/2a/19/fb/2a19fb85-2f70-9e44-f2a9-82abe679b88e/886449990061.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        },
+        {
+          "id": "sp-1870984036",
+          "title": "American Girls",
+          "artist": "Harry Styles",
+          "album": "Kiss All The Time. Disco, Occasionally.",
+          "duration": "3:33",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/07/41/6a/07416a78-38b9-2d47-7ce8-8a52a44c510f/196874010112.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        },
+        {
+          "id": "sp-1440899467",
+          "title": "ocean eyes",
+          "artist": "Billie Eilish",
+          "album": "dont smile at me",
+          "duration": "3:20",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/02/1d/30/021d3036-5503-3ed3-df00-882f2833a6ae/17UM1IM17026.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        },
+        {
+          "id": "sp-1739659144",
+          "title": "WILDFLOWER",
+          "artist": "Billie Eilish",
+          "album": "HIT ME HARD AND SOFT",
+          "duration": "4:21",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/92/9f/69/929f69f1-9977-3a44-d674-11f70c852d1b/24UMGIM36186.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        },
+        {
+          "id": "sp-1739659142",
+          "title": "BIRDS OF A FEATHER",
+          "artist": "Billie Eilish",
+          "album": "HIT ME HARD AND SOFT",
+          "duration": "3:30",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/92/9f/69/929f69f1-9977-3a44-d674-11f70c852d1b/24UMGIM36186.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        },
+        {
+          "id": "sp-1369380479",
+          "title": "lovely",
+          "artist": "Billie Eilish & Khalid",
+          "album": "lovely - Single",
+          "duration": "3:20",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/27/94/d4/2794d4fc-c3e2-2373-3e6c-dd82fd5aefe6/18UMGIM18200.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        },
+        {
+          "id": "sp-1889992115",
+          "title": "stupid song",
+          "artist": "Olivia Rodrigo",
+          "album": "you seem pretty sad for a girl so in love",
+          "duration": "3:29",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/1d/1b/f9/1d1bf9b1-44c6-9a6c-6ffb-c158488c06ce/26UMGIM39303.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        },
+        {
+          "id": "sp-1560735421",
+          "title": "traitor",
+          "artist": "Olivia Rodrigo",
+          "album": "SOUR",
+          "duration": "3:49",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/33/fd/32/33fd32b1-0e43-9b4a-8ed6-19643f23544e/21UMGIM26092.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        },
+        {
+          "id": "sp-1889992113",
+          "title": "drop dead",
+          "artist": "Olivia Rodrigo",
+          "album": "you seem pretty sad for a girl so in love",
+          "duration": "3:44",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/1d/1b/f9/1d1bf9b1-44c6-9a6c-6ffb-c158488c06ce/26UMGIM39303.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        },
+        {
+          "id": "sp-1560735480",
+          "title": "drivers license",
+          "artist": "Olivia Rodrigo",
+          "album": "SOUR",
+          "duration": "4:02",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/02/ed/8c/02ed8cab-c089-2fdd-7ce6-ab334a9a4e19/21UMGIM26093.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        },
+        {
+          "id": "sp-6814997425",
+          "title": "Patient Zero",
+          "artist": "Taylor Swift",
+          "album": "The Life of a Showgirl: The Encore",
+          "duration": "3:45",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/a0/dd/fd/a0ddfd72-ee9e-f046-6466-a5dbefc696fa/26UM1IM21436.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        },
+        {
+          "id": "sp-6775527443",
+          "title": "I Knew It, I Knew You (From \"Toy Story 5\")",
+          "artist": "Taylor Swift",
+          "album": "I Knew It, I Knew You (From \"Toy Story 5\") - Single",
+          "duration": "2:58",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/34/35/6c/34356cb4-bd0b-3bac-b118-1a6d7264dc64/26UMGIM69942.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        },
+        {
+          "id": "sp-1440935808",
+          "title": "Blank Space",
+          "artist": "Taylor Swift",
+          "album": "1989",
+          "duration": "3:51",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/89/4a/4a/894a4ab9-b0b0-9ea5-ca41-8da0b9b79453/14UMDIM03405.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        },
+        {
+          "id": "sp-1440936016",
+          "title": "Shake It Off",
+          "artist": "Taylor Swift",
+          "album": "1989",
+          "duration": "3:39",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/89/4a/4a/894a4ab9-b0b0-9ea5-ca41-8da0b9b79453/14UMDIM03405.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        },
+        {
+          "id": "sp-6763656725",
+          "title": "hate that i made you love me",
+          "artist": "Ariana Grande",
+          "album": "petal",
+          "duration": "3:17",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/56/f4/96/56f49612-02dd-83f4-44fe-d2118cc70707/26UMGIM51129.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        },
+        {
+          "id": "sp-1440852992",
+          "title": "Love Me Harder",
+          "artist": "Ariana Grande & The Weeknd",
+          "album": "My Everything (Bonus Tracks Edition)",
+          "duration": "3:56",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/a5/39/86/a5398609-ad90-50d3-57ad-0f87a4df5ac4/14UMGIM28138.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "pop_hits"
+        }
+      ]
+    },
+    "hiphop_central": {
+      "name": "Hip-Hop & Rap Central",
+      "icon": "💎",
+      "tracks": [
+        {
+          "id": "sp-1440829630",
+          "title": "Hold On, We're Going Home (feat. Majid Jordan)",
+          "artist": "Drake",
+          "album": "Nothing Was the Same (Deluxe)",
+          "duration": "3:51",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/51/61/f3/5161f3c4-2292-f035-eb68-6f95bbc9edd6/00602537542338.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        },
+        {
+          "id": "sp-1440843496",
+          "title": "One Dance (feat. Wizkid & Kyla)",
+          "artist": "Drake",
+          "album": "Views",
+          "duration": "2:53",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/95/f5/87/95f587f7-21c3-d5f9-d81a-4350f9caa020/16UMGIM27643.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        },
+        {
+          "id": "sp-1440841730",
+          "title": "Hotline Bling",
+          "artist": "Drake",
+          "album": "Views",
+          "duration": "4:27",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/f2/0d/8b/f20d8bff-a927-ae98-6784-20a1f51cb23e/16UMGIM27642.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        },
+        {
+          "id": "sp-1447555315",
+          "title": "MÍA (feat. Drake)",
+          "artist": "Bad Bunny",
+          "album": "X 100PRE",
+          "duration": "3:30",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/cf/3a/db/cf3adbe6-8ea1-f60f-60fd-713eefda3962/193483317984.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        },
+        {
+          "id": "sp-1781270323",
+          "title": "luther",
+          "artist": "Kendrick Lamar",
+          "album": "GNX",
+          "duration": "2:57",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/50/c2/cc/50c2cc95-3658-9417-0d4b-831abde44ba1/24UM1IM28978.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        },
+        {
+          "id": "sp-1440881708",
+          "title": "LOVE. (feat. Zacari)",
+          "artist": "Kendrick Lamar",
+          "album": "DAMN.",
+          "duration": "3:33",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/86/c9/bb/86c9bb30-fe3d-442e-33c1-c106c4d23705/17UMGIM88776.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        },
+        {
+          "id": "sp-1781353929",
+          "title": "Not Like Us",
+          "artist": "Kendrick Lamar",
+          "album": "Not Like Us - Single",
+          "duration": "4:34",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/31/3a/3f/313a3fbc-bb8f-80c7-b5a2-e226869a38cd/24UMGIM51924.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        },
+        {
+          "id": "sp-1440903307",
+          "title": "All The Stars",
+          "artist": "Kendrick Lamar, SZA",
+          "album": "Black Panther: The Album",
+          "duration": "3:52",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/4d/16/55/4d165549-3d11-86dc-fcbf-be7fe0bcadfb/18UMGIM00002.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        },
+        {
+          "id": "sp-1421658665",
+          "title": "BUTTERFLY EFFECT",
+          "artist": "Travis Scott",
+          "album": "ASTROWORLD",
+          "duration": "3:10",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/e7/49/8f/e7498f65-df8f-bead-d6e3-2a8d4d642a79/886447235317.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        },
+        {
+          "id": "sp-1421243212",
+          "title": "YOSEMITE",
+          "artist": "Travis Scott",
+          "album": "ASTROWORLD",
+          "duration": "2:30",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/30/66/90/306690d4-2a29-402e-e406-6b319ce7731a/886447227169.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        },
+        {
+          "id": "sp-1421658123",
+          "title": "SICKO MODE",
+          "artist": "Travis Scott",
+          "album": "ASTROWORLD",
+          "duration": "5:12",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/e7/49/8f/e7498f65-df8f-bead-d6e3-2a8d4d642a79/886447235317.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        },
+        {
+          "id": "sp-1440545960",
+          "title": "Work Out",
+          "artist": "J. Cole",
+          "album": "Cole World: The Sideline Story",
+          "duration": "3:55",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/4f/be/d2/4fbed251-5117-c028-bec6-86a29e2fc269/18UMGIM74053.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        },
+        {
+          "id": "sp-1438892859",
+          "title": "In the Morning (feat. Drake)",
+          "artist": "J. Cole",
+          "album": "Cole World: The Sideline Story",
+          "duration": "3:54",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/3c/4e/6c/3c4e6c35-c1cf-49f9-8cbb-524b1db743f5/18UMGIM69899.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        },
+        {
+          "id": "sp-1373858922",
+          "title": "Intro",
+          "artist": "J. Cole",
+          "album": "KOD",
+          "duration": "1:47",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/04/f4/a2/04f4a2ca-81d1-a258-0c70-ee555840bc15/18UMGIM22943.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        },
+        {
+          "id": "sp-1463686704",
+          "title": "Purple Emoji (feat. J. Cole)",
+          "artist": "Ty Dolla $ign",
+          "album": "Purple Emoji (feat. J. Cole) - Single",
+          "duration": "2:43",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/a2/c9/9a/a2c99a12-082d-f086-ecf4-07ba7f7bab08/075679846235.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        },
+        {
+          "id": "sp-6834029465",
+          "title": "WTF GOIN",
+          "artist": "Belly Gang Kushington & 21 Savage",
+          "album": "GOOD DOPE SELL ITSELF",
+          "duration": "3:04",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/c4/7c/93/c47c93bc-078d-65a7-c96f-a4599cf01b26/711641244325.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        },
+        {
+          "id": "sp-1567422567",
+          "title": "m y . l i f e",
+          "artist": "J. Cole, 21 Savage & Morray",
+          "album": "The Off-Season",
+          "duration": "3:38",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/66/a5/25/66a52540-c0d2-f336-cbfb-8413e6f23beb/21UMGIM41233.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        },
+        {
+          "id": "sp-1488720719",
+          "title": "21 Savage",
+          "artist": "J. Monty",
+          "album": "Testify: Season 1",
+          "duration": "3:03",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music123/v4/90/e6/a6/90e6a666-f0dc-a63b-3fd9-63b701f68f85/859735827433_cover.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        },
+        {
+          "id": "sp-1447452168",
+          "title": "a lot",
+          "artist": "21 Savage",
+          "album": "i am > i was",
+          "duration": "4:48",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/07/94/f7/0794f7c3-0042-6aa8-022e-ae008868eb75/886447365144.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        },
+        {
+          "id": "sp-6836040883",
+          "title": "Top Uh It",
+          "artist": "Lil Baby",
+          "album": "FRESH",
+          "duration": "2:26",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/b1/48/2e/b1482e9e-c823-1954-2580-e671be92442c/26UM1IM31431.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        },
+        {
+          "id": "sp-6836042004",
+          "title": "Like A Brat",
+          "artist": "Lil Baby",
+          "album": "FRESH",
+          "duration": "3:11",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/b1/48/2e/b1482e9e-c823-1954-2580-e671be92442c/26UM1IM31431.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        },
+        {
+          "id": "sp-6836041823",
+          "title": "Your Fault",
+          "artist": "Lil Baby",
+          "album": "FRESH",
+          "duration": "3:13",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/b1/48/2e/b1482e9e-c823-1954-2580-e671be92442c/26UM1IM31431.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        },
+        {
+          "id": "sp-6836040909",
+          "title": "Mr. Do Something",
+          "artist": "Lil Baby",
+          "album": "FRESH",
+          "duration": "2:50",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/b1/48/2e/b1482e9e-c823-1954-2580-e671be92442c/26UM1IM31431.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        },
+        {
+          "id": "sp-6836938573",
+          "title": "I just realized. (feat. Future)",
+          "artist": "YFN Lucci & Rod Wave",
+          "album": "Disc 1",
+          "duration": "5:26",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/aa/4f/0b/aa4f0b8e-9955-cd2b-e581-c275834853af/075679546197.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        },
+        {
+          "id": "sp-6836938999",
+          "title": "LAKEHOUSE. (feat. Future)",
+          "artist": "YFN Lucci",
+          "album": "Disc 2",
+          "duration": "4:01",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/f6/3e/2e/f63e2e5e-23bc-88be-73b7-e131d980bc85/075679546197.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "hiphop_central"
+        }
+      ]
+    },
+    "rnb_soul": {
+      "name": "R&B & Late Night Soul",
+      "icon": "🔮",
+      "tracks": [
+        {
+          "id": "sp-1732348414",
+          "title": "Saturn",
+          "artist": "SZA",
+          "album": "Saturn - Single",
+          "duration": "3:06",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/0f/90/a8/0f90a856-0447-d846-fa7b-b9c937e72310/196871881180.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        },
+        {
+          "id": "sp-1657869393",
+          "title": "Kill Bill",
+          "artist": "SZA",
+          "album": "SOS",
+          "duration": "2:33",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/bd/3b/a9/bd3ba9fb-9609-144f-bcfe-ead67b5f6ab3/196589564931.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        },
+        {
+          "id": "sp-1657869546",
+          "title": "Open Arms (feat. Travis Scott)",
+          "artist": "SZA",
+          "album": "SOS",
+          "duration": "3:59",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/bd/3b/a9/bd3ba9fb-9609-144f-bcfe-ead67b5f6ab3/196589564931.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        },
+        {
+          "id": "sp-1396141904",
+          "title": "What Lovers Do (feat. SZA)",
+          "artist": "Maroon 5",
+          "album": "Red Pill Blues (Deluxe)",
+          "duration": "3:19",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/8a/49/80/8a49806e-e9b6-1025-f4a8-cf51edb4504b/17UM1IM31406.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        },
+        {
+          "id": "sp-1440766128",
+          "title": "Thinkin Bout You",
+          "artist": "Frank Ocean",
+          "album": "channel ORANGE",
+          "duration": "3:20",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/04/f8/63/04f863fc-2852-604f-c910-a97ac069506b/12UMGIM40339.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        },
+        {
+          "id": "sp-1146195725",
+          "title": "White Ferrari",
+          "artist": "Frank Ocean",
+          "album": "Blonde",
+          "duration": "4:08",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/bb/45/68/bb4568f3-68cd-619d-fbcb-4e179916545d/BlondCover-Final.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        },
+        {
+          "id": "sp-1146195714",
+          "title": "Pink + White",
+          "artist": "Frank Ocean",
+          "album": "Blonde",
+          "duration": "3:04",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/bb/45/68/bb4568f3-68cd-619d-fbcb-4e179916545d/BlondCover-Final.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        },
+        {
+          "id": "sp-1146195718",
+          "title": "Self Control",
+          "artist": "Frank Ocean",
+          "album": "Blonde",
+          "duration": "4:09",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/bb/45/68/bb4568f3-68cd-619d-fbcb-4e179916545d/BlondCover-Final.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        },
+        {
+          "id": "sp-1799080775",
+          "title": "Get You (feat. Kali Uchis)",
+          "artist": "Daniel Caesar",
+          "album": "Freudian",
+          "duration": "4:38",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/b6/cd/1a/b6cd1a5b-83af-a1e2-0ad7-ea530fcf2522/859722261219.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        },
+        {
+          "id": "sp-1799080776",
+          "title": "Best Part (feat. H.E.R.)",
+          "artist": "Daniel Caesar",
+          "album": "Freudian",
+          "duration": "3:29",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/b6/cd/1a/b6cd1a5b-83af-a1e2-0ad7-ea530fcf2522/859722261219.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        },
+        {
+          "id": "sp-1671667306",
+          "title": "Superpowers",
+          "artist": "Daniel Caesar",
+          "album": "NEVER ENOUGH",
+          "duration": "2:54",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/24/4f/ec/244fec58-ea20-e0b0-eea6-e06c6aff948b/23UMGIM14483.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        },
+        {
+          "id": "sp-1861540655",
+          "title": "Who Knows",
+          "artist": "Daniel Caesar",
+          "album": "Son Of Spergy",
+          "duration": "3:46",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/83/ca/bb/83cabb97-8289-4a91-4d3b-4760b64d2971/25UMGIM90844.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        },
+        {
+          "id": "sp-1867923703",
+          "title": "butterflies.",
+          "artist": "Brent Faiyaz",
+          "album": "Icon",
+          "duration": "4:08",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/89/83/6e/89836e4d-f67d-cc37-8ca9-b0e7c96f10ff/199976295487.png/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        },
+        {
+          "id": "sp-1777073320",
+          "title": "For Me (Remix)",
+          "artist": "Loe Shimmy & Brent Faiyaz",
+          "album": "For Me (Remix) - Single",
+          "duration": "3:23",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/ed/2a/8b/ed2a8b17-b457-3c52-79c8-0ce7cc212619/797885498182_cover.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        },
+        {
+          "id": "sp-1139258980",
+          "title": "Poison",
+          "artist": "Brent Faiyaz",
+          "album": "Poison - Single",
+          "duration": "3:32",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/15/c6/2e/15c62ef4-6290-1b87-7231-c80367330ad9/859717911228_cover.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        },
+        {
+          "id": "sp-1153937467",
+          "title": "Lovely",
+          "artist": "Brent Faiyaz",
+          "album": "A.M. Paradox - EP",
+          "duration": "4:51",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/4f/39/43/4f39439f-fa9b-9b93-bd68-e808767a43d6/859718224273_cover.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        },
+        {
+          "id": "sp-1556123057",
+          "title": "Like I Want You",
+          "artist": "GIVĒON",
+          "album": "When It's All Said And Done... Take Time",
+          "duration": "4:20",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/3b/ab/69/3bab69b8-97b6-2c7f-6e5f-86e091696bea/886448745839.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        },
+        {
+          "id": "sp-1556123056",
+          "title": "Heartbreak Anniversary",
+          "artist": "GIVĒON",
+          "album": "When It's All Said And Done... Take Time",
+          "duration": "3:18",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/3b/ab/69/3bab69b8-97b6-2c7f-6e5f-86e091696bea/886448745839.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        },
+        {
+          "id": "sp-1792985191",
+          "title": "TWENTIES",
+          "artist": "GIVĒON",
+          "album": "TWENTIES - Single",
+          "duration": "2:51",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/86/38/92/86389240-2b30-e67d-2993-b495672f51ae/196872836417.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        },
+        {
+          "id": "sp-1627366438",
+          "title": "Lost Me",
+          "artist": "GIVĒON",
+          "album": "Give Or Take",
+          "duration": "3:00",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/9a/15/77/9a157761-5d28-9737-1772-56dc04127f15/886449310944.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        },
+        {
+          "id": "sp-1365643991",
+          "title": "Session 32",
+          "artist": "Summer Walker",
+          "album": "Session 32 - Single",
+          "duration": "1:38",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/f1/f4/ed/f1f4ed38-22c8-53f9-4c40-9efa94f18a03/00602567569459.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        },
+        {
+          "id": "sp-1481606173",
+          "title": "Tonight",
+          "artist": "Summer Walker",
+          "album": "Over It",
+          "duration": "2:56",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/9d/d3/62/9dd362c9-0b8c-a7df-6054-1b4bb76af946/19UMGIM85343.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        },
+        {
+          "id": "sp-1438765304",
+          "title": "Karma",
+          "artist": "Summer Walker",
+          "album": "Last Day of Summer",
+          "duration": "3:08",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/7c/1e/1a/7c1e1a21-013c-f31d-dc2c-c8118439641d/18UMGIM66021.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        },
+        {
+          "id": "sp-1438765140",
+          "title": "CPR",
+          "artist": "Summer Walker",
+          "album": "Last Day of Summer",
+          "duration": "3:23",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/7c/1e/1a/7c1e1a21-013c-f31d-dc2c-c8118439641d/18UMGIM66021.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        },
+        {
+          "id": "sp-1535678349",
+          "title": "Damage",
+          "artist": "H.E.R.",
+          "album": "Damage - Single",
+          "duration": "3:43",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/94/1b/39/941b39bf-e997-4a29-ffb7-196d46d7e7a9/886448213802.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "rnb_soul"
+        }
+      ]
+    },
+    "latin_fire": {
+      "name": "Latin & Reggaeton Hits",
+      "icon": "🌴",
+      "tracks": [
+        {
+          "id": "sp-1787022572",
+          "title": "NUEVAYoL",
+          "artist": "Bad Bunny",
+          "album": "DeBÍ TiRAR MáS FOToS",
+          "duration": "3:03",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/90/5e/7e/905e7ed5-a8fa-a8f3-cd06-0028fdf3afaa/199066342442.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        },
+        {
+          "id": "sp-1470146813",
+          "title": "LA CANCIÓN",
+          "artist": "J Balvin & Bad Bunny",
+          "album": "OASIS",
+          "duration": "4:02",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/77/32/74/7732746d-25e5-baae-b921-bad4a07d87b1/19UMGIM55524.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        },
+        {
+          "id": "sp-1622045962",
+          "title": "Ojitos Lindos",
+          "artist": "Bad Bunny & Bomba Estéreo",
+          "album": "Un Verano Sin Ti",
+          "duration": "4:18",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/3e/04/eb/3e04ebf6-370f-f59d-ec84-2c2643db92f1/196626945068.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        },
+        {
+          "id": "sp-1652080289",
+          "title": "No Me Conoce (Remix)",
+          "artist": "JHAYCO, J Balvin & Bad Bunny",
+          "album": "Famouz",
+          "duration": "5:07",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/4f/64/d2/4f64d264-ce5b-64a7-3d11-5d7550613db1/22UM1IM25832.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        },
+        {
+          "id": "sp-1775463293",
+          "title": "Khé?",
+          "artist": "Rauw Alejandro & Romeo Santos",
+          "album": "Cosa Nuestra",
+          "duration": "3:26",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/ab/e8/09/abe8092d-ef44-61b9-6b50-ab7efb78ca51/196872401516.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        },
+        {
+          "id": "sp-1775462856",
+          "title": "Tú Con Él",
+          "artist": "Rauw Alejandro",
+          "album": "Cosa Nuestra",
+          "duration": "4:49",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/ab/e8/09/abe8092d-ef44-61b9-6b50-ab7efb78ca51/196872401516.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        },
+        {
+          "id": "sp-1596868402",
+          "title": "Desenfocao'",
+          "artist": "Rauw Alejandro",
+          "album": "VICE VERSA",
+          "duration": "2:50",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/58/13/c3/5813c326-a7fa-f792-77e1-8310d9c80742/886449738724.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        },
+        {
+          "id": "sp-1560216835",
+          "title": "Tiroteo (Remix)",
+          "artist": "Marc Segui, Rauw Alejandro & Pol Granch",
+          "album": "Tiroteo (Remix) - Single",
+          "duration": "5:21",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/0b/c9/c6/0bc9c6da-7431-7381-f0b6-035292a8192b/190296719691.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        },
+        {
+          "id": "sp-1440817278",
+          "title": "Ay Vamos",
+          "artist": "J Balvin",
+          "album": "La Familia B Sides",
+          "duration": "3:46",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/dd/ac/fe/ddacfe4b-742e-a5ca-591e-190c9b7003fe/14UMGIM27311.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        },
+        {
+          "id": "sp-1368816792",
+          "title": "Mi Gente",
+          "artist": "J Balvin & Willy William",
+          "album": "Vibras",
+          "duration": "3:05",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/43/23/44/43234493-859a-53f6-e31c-805370dc33d7/18UMGIM19841.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        },
+        {
+          "id": "sp-1500491200",
+          "title": "Azul",
+          "artist": "J Balvin",
+          "album": "Colores",
+          "duration": "3:25",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/ae/b3/66/aeb36667-f9b2-c455-c3fc-a53bbd5ec4c1/20UMGIM10542.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        },
+        {
+          "id": "sp-1646180883",
+          "title": "Hey Mor (feat. Feid)",
+          "artist": "Ozuna",
+          "album": "OzuTochi",
+          "duration": "3:16",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/46/b1/35/46b135cc-592e-8b51-1e91-ac955d4200a0/196925396240.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        },
+        {
+          "id": "sp-1719170507",
+          "title": "LUNA",
+          "artist": "Feid & ATL Jacob",
+          "album": "FERXXOCALIPSIS",
+          "duration": "3:16",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/7c/54/aa/7c54aa94-9ae3-4b80-7b23-8b23955dc3a2/23UM1IM60703.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        },
+        {
+          "id": "sp-1645032135",
+          "title": "Feliz Cumpleaños Ferxxo",
+          "artist": "Feid",
+          "album": "FELIZ CUMPLEAÑOS FERXXO TE PIRATEAMOS EL ÁLBUM",
+          "duration": "2:36",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/54/90/df/5490dfaf-d6a4-579c-f6e4-81fd59f6ae3f/22UM1IM04831.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        },
+        {
+          "id": "sp-1627063734",
+          "title": "Ferxxo 100",
+          "artist": "Feid",
+          "album": "Ferxxo 100 - Single",
+          "duration": "2:47",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/54/54/fa/5454fa2c-c3c9-8cf2-8ad5-a5700d743adb/22UMGIM54980.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        },
+        {
+          "id": "sp-6796864754",
+          "title": "BbY WOW",
+          "artist": "KAROL G, Judeline & rusowsky",
+          "album": "NO ME ARREPIENTO DE SENTIR TANTO",
+          "duration": "3:45",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/2b/66/b2/2b66b26c-ab23-faa1-c4ee-06fa2cce8f76/26UM1IM00558.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        },
+        {
+          "id": "sp-1752031539",
+          "title": "Si Antes Te Hubiera Conocido",
+          "artist": "KAROL G",
+          "album": "Si Antes Te Hubiera Conocido - Single",
+          "duration": "3:15",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/a0/60/94/a060947c-54d8-0fad-c558-eed12600224c/24UMGIM62705.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        },
+        {
+          "id": "sp-6796864746",
+          "title": "Ahí",
+          "artist": "KAROL G & Drake",
+          "album": "NO ME ARREPIENTO DE SENTIR TANTO",
+          "duration": "2:56",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/2b/66/b2/2b66b26c-ab23-faa1-c4ee-06fa2cce8f76/26UM1IM00558.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        },
+        {
+          "id": "sp-1619425410",
+          "title": "PROVENZA",
+          "artist": "KAROL G",
+          "album": "PROVENZA - Single",
+          "duration": "3:29",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/4b/91/32/4b91325f-a1ae-05d8-523d-011549d20a42/22UMGIM40133.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        },
+        {
+          "id": "sp-1377817652",
+          "title": "Felices los 4",
+          "artist": "Maluma",
+          "album": "F.A.M.E.",
+          "duration": "3:49",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/d8/86/a0/d886a0f9-dcdf-fe85-6d6c-9382b63305d1/886446853161.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        },
+        {
+          "id": "sp-1048181443",
+          "title": "Borró Cassette",
+          "artist": "Maluma",
+          "album": "Pretty Boy, Dirty Boy",
+          "duration": "3:27",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/05/17/51/051751c2-d6cd-c466-9e0d-c185d8e22897/886445195026.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        },
+        {
+          "id": "sp-1048181445",
+          "title": "El Perdedor",
+          "artist": "Maluma",
+          "album": "Pretty Boy, Dirty Boy",
+          "duration": "3:27",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/05/17/51/051751c2-d6cd-c466-9e0d-c185d8e22897/886445195026.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        },
+        {
+          "id": "sp-1461912470",
+          "title": "11 PM",
+          "artist": "Maluma",
+          "album": "11:11",
+          "duration": "2:55",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/09/c5/c2/09c5c2c4-b022-bcbe-a3ab-7e85e1d7084d/886447616321.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        },
+        {
+          "id": "sp-1269286851",
+          "title": "Dile Que Tú Me Quieres",
+          "artist": "Ozuna",
+          "album": "Odisea",
+          "duration": "3:46",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/df/7c/1b/df7c1b32-0fca-94f0-866b-ba89e420ca04/697691884103.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        },
+        {
+          "id": "sp-1269286798",
+          "title": "Se Preparó",
+          "artist": "Ozuna",
+          "album": "Odisea",
+          "duration": "3:08",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/df/7c/1b/df7c1b32-0fca-94f0-866b-ba89e420ca04/697691884103.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "latin_fire"
+        }
+      ]
+    },
+    "edm_dance": {
+      "name": "Electronic & Dance Anthems",
+      "icon": "⚡",
+      "tracks": [
+        {
+          "id": "sp-1713469225",
+          "title": "Feel So Close (Radio Edit)",
+          "artist": "Calvin Harris",
+          "album": "18 Months",
+          "duration": "3:26",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/ab/af/22/abaf2296-ed4d-6da2-c24d-503cfdfa4c1f/0617465356858.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        },
+        {
+          "id": "sp-922876189",
+          "title": "Summer",
+          "artist": "Calvin Harris",
+          "album": "Motion",
+          "duration": "3:42",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/da/50/cc/da50cc80-3515-a38d-369b-0d700ffd249d/886444820448.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        },
+        {
+          "id": "sp-1713469232",
+          "title": "Sweet Nothing (feat. Florence Welch)",
+          "artist": "Calvin Harris",
+          "album": "18 Months",
+          "duration": "3:33",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/ab/af/22/abaf2296-ed4d-6da2-c24d-503cfdfa4c1f/0617465356858.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        },
+        {
+          "id": "sp-922876187",
+          "title": "Outside (feat. Ellie Goulding)",
+          "artist": "Calvin Harris",
+          "album": "Motion",
+          "duration": "3:47",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/da/50/cc/da50cc80-3515-a38d-369b-0d700ffd249d/886444820448.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        },
+        {
+          "id": "sp-693226464",
+          "title": "Titanium (feat. Sia)",
+          "artist": "David Guetta",
+          "album": "Nothing But the Beat",
+          "duration": "4:05",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/99/b4/7b/99b47bd8-2b22-e1ef-2e60-c5147f27a861/dj.thrvmjqj.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        },
+        {
+          "id": "sp-1715687127",
+          "title": "Memories (feat. Kid Cudi)",
+          "artist": "David Guetta",
+          "album": "One More Love",
+          "duration": "3:30",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/7f/26/33/7f2633e4-dace-c4b5-2920-f3bae1b48b08/5099990785054.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        },
+        {
+          "id": "sp-693226002",
+          "title": "Without You (feat. Usher)",
+          "artist": "David Guetta",
+          "album": "Nothing But the Beat",
+          "duration": "3:28",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/99/b4/7b/99b47bd8-2b22-e1ef-2e60-c5147f27a861/dj.thrvmjqj.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        },
+        {
+          "id": "sp-693290786",
+          "title": "Play Hard (feat. Akon & Ne-Yo)",
+          "artist": "David Guetta",
+          "album": "Nothing But the Beat 2.0",
+          "duration": "3:21",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/f6/b9/e2/f6b9e2df-c638-3e4b-c28d-a68b06465758/5099997943051.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        },
+        {
+          "id": "sp-1440872929",
+          "title": "Wake Me Up",
+          "artist": "Avicii",
+          "album": "True",
+          "duration": "4:09",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/18/5b/1e/185b1ef5-5d97-19d8-aebf-8e29e41874ef/13UAAIM59255.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        },
+        {
+          "id": "sp-1440787349",
+          "title": "Levels",
+          "artist": "Avicii",
+          "album": "Levels - EP",
+          "duration": "5:38",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/67/38/43/67384338-9ed7-fc68-5927-93f1fcf4705d/11UMGIM36900.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        },
+        {
+          "id": "sp-1440829549",
+          "title": "The Nights",
+          "artist": "Avicii",
+          "album": "The Days / Nights - EP",
+          "duration": "2:56",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/35/4d/a0/354da058-972b-dcf9-feec-609895ba8cb2/14UMGIM56567.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        },
+        {
+          "id": "sp-1440873108",
+          "title": "Hey Brother",
+          "artist": "Avicii",
+          "album": "True",
+          "duration": "4:14",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/18/5b/1e/185b1ef5-5d97-19d8-aebf-8e29e41874ef/13UAAIM59255.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        },
+        {
+          "id": "sp-1170699703",
+          "title": "Closer (feat. Halsey)",
+          "artist": "The Chainsmokers",
+          "album": "Collage - EP",
+          "duration": "4:05",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/41/f8/38/41f8380b-9b56-d5d4-31f7-a6411c0c9aaa/886446102054.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        },
+        {
+          "id": "sp-1170699706",
+          "title": "Don't Let Me Down (feat. Daya)",
+          "artist": "The Chainsmokers",
+          "album": "Collage - EP",
+          "duration": "3:28",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/41/f8/38/41f8380b-9b56-d5d4-31f7-a6411c0c9aaa/886446102054.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        },
+        {
+          "id": "sp-1050203620",
+          "title": "Roses (feat. ROZES)",
+          "artist": "The Chainsmokers",
+          "album": "Bouquet - EP",
+          "duration": "3:45",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/5e/5c/ea/5e5cead2-a482-48ef-8134-f725c2b49202/mzm.lydeceiv.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        },
+        {
+          "id": "sp-1207120448",
+          "title": "Something Just Like This",
+          "artist": "The Chainsmokers & Coldplay",
+          "album": "Memories...Do Not Open",
+          "duration": "4:07",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/9d/56/6f/9d566f55-5253-bed6-5c31-df952dae649d/886446379289.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        },
+        {
+          "id": "sp-1729939966",
+          "title": "CONTIGO",
+          "artist": "KAROL G & Tiësto",
+          "album": "CONTIGO - Single",
+          "duration": "3:12",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/ec/5c/b8/ec5cb83e-f24f-9984-56ac-8402b522368d/24UMGIM13229.rgb.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        },
+        {
+          "id": "sp-1532019310",
+          "title": "The Business",
+          "artist": "Tiësto",
+          "album": "The Business - Single",
+          "duration": "2:44",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/cf/81/b8/cf81b800-bc37-cb1e-008e-a1211ce21d19/075679803429.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        },
+        {
+          "id": "sp-1652508861",
+          "title": "10:35",
+          "artist": "Tiësto & Tate McRae",
+          "album": "DRIVE",
+          "duration": "2:52",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/e3/bb/5c/e3bb5c43-25fa-835d-c962-f3ef7b15bbe6/075679708489.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        },
+        {
+          "id": "sp-1853140859",
+          "title": "Bring Me To Life",
+          "artist": "Tiësto & FORS",
+          "album": "Bring Me To Life - Single",
+          "duration": "4:18",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/af/33/46/af3346d4-439a-a3dd-44ee-47178742b4af/075679592040.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        },
+        {
+          "id": "sp-1137641426",
+          "title": "In the Name of Love",
+          "artist": "Martin Garrix & Bebe Rexha",
+          "album": "In The Name Of Love - Single",
+          "duration": "3:18",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/fc/8a/d2/fc8ad2a2-c75b-c33f-5d1a-070539e647bd/886446028088.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        },
+        {
+          "id": "sp-1670593167",
+          "title": "Animals",
+          "artist": "Martin Garrix",
+          "album": "Animals - Single",
+          "duration": "5:04",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/6e/1e/f0/6e1ef055-195a-bb73-d5a8-5926058366a5/8712944577525.png/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        },
+        {
+          "id": "sp-1416740913",
+          "title": "High on Life (feat. Bonn)",
+          "artist": "Martin Garrix",
+          "album": "High on Life (feat. Bonn) - Single",
+          "duration": "3:50",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/58/a2/33/58a23353-b253-405c-b930-d5f3e6b87476/886447232422.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        },
+        {
+          "id": "sp-1196786344",
+          "title": "Scared to Be Lonely",
+          "artist": "Martin Garrix & Dua Lipa",
+          "album": "Scared To Be Lonely - Single",
+          "duration": "3:40",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/44/46/1f/44461f0c-a949-ce72-0164-704056469fc8/886446328331.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        },
+        {
+          "id": "sp-6796842545",
+          "title": "Te Estoy Correteando",
+          "artist": "LATIN MAFIA & Fred again..",
+          "album": "9 months & 50 hours",
+          "duration": "3:13",
+          "thumbnail": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/90/52/6e/90526e94-89c7-8387-458f-1972f7995d48/1200214495824.jpg/600x600bb.jpg",
+          "source": "spotify",
+          "category": "edm_dance"
+        }
+      ]
+    }
+  },
+  "youtube": {
+    "chill_lofi": {
+      "name": "Chill & Lo-Fi Beats",
+      "icon": "🌙",
+      "tracks": [
+        {
+          "id": "1fueZCTYkpA",
+          "title": "Morning Coffee ☕️ [lofi hip hop]",
+          "artist": "Lofi Girl",
+          "duration": "1:04:28",
+          "thumbnail": "https://i.ytimg.com/vi/1fueZCTYkpA/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        },
+        {
+          "id": "iLI0TwQr3UY",
+          "title": "Losing Interest (Original)",
+          "artist": "Shiloh Dynasty",
+          "duration": "1:58",
+          "thumbnail": "https://i.ytimg.com/vi/iLI0TwQr3UY/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        },
+        {
+          "id": "K3Qzzggn--s",
+          "title": "SLOW DANCING IN THE DARK",
+          "artist": "Joji",
+          "duration": "3:38",
+          "thumbnail": "https://i.ytimg.com/vi/K3Qzzggn--s/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        },
+        {
+          "id": "O8FRrExemy4",
+          "title": "Kingdom in Blue",
+          "artist": "Kupla",
+          "duration": "22:24",
+          "thumbnail": "https://i.ytimg.com/vi/O8FRrExemy4/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        },
+        {
+          "id": "LkhPi6J5Xg0",
+          "title": "controlla",
+          "artist": "idealism",
+          "duration": "1:48",
+          "thumbnail": "https://i.ytimg.com/vi/LkhPi6J5Xg0/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        },
+        {
+          "id": "Bw6wugjLYU0",
+          "title": "im closing my eyes (feat. shiloh) / Jocelyn Flores",
+          "artist": "potsu",
+          "duration": "1:59",
+          "thumbnail": "https://i.ytimg.com/vi/Bw6wugjLYU0/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        },
+        {
+          "id": "vSnGF1iTwZ0",
+          "title": "Harbor by Tomppabeats",
+          "artist": "vrrdnt",
+          "duration": "34:38",
+          "thumbnail": "https://i.ytimg.com/vi/vSnGF1iTwZ0/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        },
+        {
+          "id": "8QVBSNRrpc8",
+          "title": "Sakura Trees",
+          "artist": "saib.",
+          "duration": "1:44",
+          "thumbnail": "https://i.ytimg.com/vi/8QVBSNRrpc8/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        },
+        {
+          "id": "qnFcVpItds4",
+          "title": "Get You The Moon (Official Video) ft. Snøw",
+          "artist": "Kina",
+          "duration": "3:04",
+          "thumbnail": "https://i.ytimg.com/vi/qnFcVpItds4/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        },
+        {
+          "id": "hNqdxGsbQsA",
+          "title": "death bed (feat. Beabadoobee)",
+          "artist": "Powfu",
+          "duration": "2:54",
+          "thumbnail": "https://i.ytimg.com/vi/hNqdxGsbQsA/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        },
+        {
+          "id": "wSgChEB7QIs",
+          "title": "tell me why i'm waiting (ft. shiloh)",
+          "artist": "timmies",
+          "duration": "2:05",
+          "thumbnail": "https://i.ytimg.com/vi/wSgChEB7QIs/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        },
+        {
+          "id": "rFZHOHl-L8A",
+          "title": "lofi hip hop radio 📚 beats to relax/study to",
+          "artist": "Lofi Girl",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/rFZHOHl-L8A/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        },
+        {
+          "id": "T9RMIa60y0U",
+          "title": "I Miss You",
+          "artist": "SwuM.",
+          "duration": "3:40",
+          "thumbnail": "https://i.ytimg.com/vi/T9RMIa60y0U/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        },
+        {
+          "id": "aksnDuHI9To",
+          "title": "this girl",
+          "artist": "elijah who",
+          "duration": "2:15",
+          "thumbnail": "https://i.ytimg.com/vi/aksnDuHI9To/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        },
+        {
+          "id": "FLCKJ23dGXA",
+          "title": "viola",
+          "artist": "eevee",
+          "duration": "1:27",
+          "thumbnail": "https://i.ytimg.com/vi/FLCKJ23dGXA/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        },
+        {
+          "id": "U7wMIPoEaHw",
+          "title": "seasons (beattape)",
+          "artist": "wun two",
+          "duration": "7:06",
+          "thumbnail": "https://i.ytimg.com/vi/U7wMIPoEaHw/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        },
+        {
+          "id": "CnffHJCDZPM",
+          "title": "10 | The Book of 2 SAMUEL (KJV) | Read By Alexander Scourby | AUDIO and TEXT | Synced Together.",
+          "artist": "Scourby YouBible Channel",
+          "duration": "1:50:17",
+          "thumbnail": "https://i.ytimg.com/vi/CnffHJCDZPM/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        },
+        {
+          "id": "LV0aEMSvlvw",
+          "title": "Park Bench",
+          "artist": "Atomic Surfers",
+          "duration": "4:05",
+          "thumbnail": "https://i.ytimg.com/vi/LV0aEMSvlvw/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        },
+        {
+          "id": "clSc9yn7IIM",
+          "title": "Coffee (1 hour) - 1 hour calm and relaxing lofi music to make you happy",
+          "artist": "Aso",
+          "duration": "1:00:57",
+          "thumbnail": "https://i.ytimg.com/vi/clSc9yn7IIM/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        },
+        {
+          "id": "45APhZ_pnX4",
+          "title": "French Inhale",
+          "artist": "[bsd.u] - Topic",
+          "duration": "1:49",
+          "thumbnail": "https://i.ytimg.com/vi/45APhZ_pnX4/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        },
+        {
+          "id": "UNyuQn45a8w",
+          "title": "Winter",
+          "artist": "[3D Audio] Caleb Belkin",
+          "duration": "2:02",
+          "thumbnail": "https://i.ytimg.com/vi/UNyuQn45a8w/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        },
+        {
+          "id": "JjWwXME3EhQ",
+          "title": "backpack city w/ tender spring",
+          "artist": "Flovry",
+          "duration": "2:32",
+          "thumbnail": "https://i.ytimg.com/vi/JjWwXME3EhQ/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        },
+        {
+          "id": "16qn2q0jDPQ",
+          "title": "Hallways",
+          "artist": "Kupla",
+          "duration": "2:12",
+          "thumbnail": "https://i.ytimg.com/vi/16qn2q0jDPQ/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        },
+        {
+          "id": "ttMst8jjkV8",
+          "title": "Clockwork [Full Album]",
+          "artist": "Philanthrope",
+          "duration": "31:16",
+          "thumbnail": "https://i.ytimg.com/vi/ttMst8jjkV8/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        },
+        {
+          "id": "CwWOY--P5Bg",
+          "title": "Remember Me",
+          "artist": "Sugi.wa - Topic",
+          "duration": "1:56",
+          "thumbnail": "https://i.ytimg.com/vi/CwWOY--P5Bg/hqdefault.jpg",
+          "source": "youtube",
+          "category": "chill_lofi"
+        }
+      ]
+    },
+    "rap_trap": {
+      "name": "Rap & Trap Anthems",
+      "icon": "⚡",
+      "tracks": [
+        {
+          "id": "ya8_AwKmv6U",
+          "title": "From The D To The A ft. Lil Yachty [Official Audio Only]",
+          "artist": "Tee Grizzley",
+          "duration": "2:39",
+          "thumbnail": "https://i.ytimg.com/vi/ya8_AwKmv6U/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        },
+        {
+          "id": "GX8Hg6kWQYI",
+          "title": "MOONLIGHT (OFFICIAL MUSIC VIDEO)",
+          "artist": "XXXTENTACION",
+          "duration": "2:18",
+          "thumbnail": "https://i.ytimg.com/vi/GX8Hg6kWQYI/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        },
+        {
+          "id": "onbC6N-QGPc",
+          "title": "Juice WRLD \"Lucid Dreams (Forget Me)\" (Official Audio)",
+          "artist": "Juice WRLD",
+          "duration": "4:11",
+          "thumbnail": "https://i.ytimg.com/vi/onbC6N-QGPc/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        },
+        {
+          "id": "H58vbez_m4E",
+          "title": "Not Like Us",
+          "artist": "Kendrick Lamar",
+          "duration": "5:55",
+          "thumbnail": "https://i.ytimg.com/vi/H58vbez_m4E/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        },
+        {
+          "id": "wL_xmuij6lA",
+          "title": "Kendrick Lamar \"HUMBLE.\" (AUDIO)",
+          "artist": "snippetlyrics",
+          "duration": "2:57",
+          "thumbnail": "https://i.ytimg.com/vi/wL_xmuij6lA/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        },
+        {
+          "id": "aWb8z-KhZdo",
+          "title": "Mask Off",
+          "artist": "Future",
+          "duration": "3:25",
+          "thumbnail": "https://i.ytimg.com/vi/aWb8z-KhZdo/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        },
+        {
+          "id": "ZBOoVj6IW3s",
+          "title": "Life Is Good (Audio) ft. Drake",
+          "artist": "Future",
+          "duration": "4:00",
+          "thumbnail": "https://i.ytimg.com/vi/ZBOoVj6IW3s/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        },
+        {
+          "id": "m1a_GqJf02M",
+          "title": "God's Plan",
+          "artist": "Drake",
+          "duration": "3:19",
+          "thumbnail": "https://i.ytimg.com/vi/m1a_GqJf02M/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        },
+        {
+          "id": "R0ykLlhg0AQ",
+          "title": "Money In The Grave ft. Rick Ross",
+          "artist": "Drake",
+          "duration": "4:18",
+          "thumbnail": "https://i.ytimg.com/vi/R0ykLlhg0AQ/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        },
+        {
+          "id": "d-JBBNg8YKs",
+          "title": "SICKO MODE (Audio)",
+          "artist": "Travis Scott",
+          "duration": "5:15",
+          "thumbnail": "https://i.ytimg.com/vi/d-JBBNg8YKs/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        },
+        {
+          "id": "uLHqpjW3aDs",
+          "title": "The Box [Official Audio]",
+          "artist": "Roddy Ricch",
+          "duration": "3:17",
+          "thumbnail": "https://i.ytimg.com/vi/uLHqpjW3aDs/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        },
+        {
+          "id": "THcVOf1kNh0",
+          "title": "Drip Too Hard (Official Audio)",
+          "artist": "Lil Baby x Gunna",
+          "duration": "2:27",
+          "thumbnail": "https://i.ytimg.com/vi/THcVOf1kNh0/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        },
+        {
+          "id": "DF2BcR1cRHw",
+          "title": "Drip or Drown (Drip or Drown)",
+          "artist": "Gunna",
+          "duration": "2:07",
+          "thumbnail": "https://i.ytimg.com/vi/DF2BcR1cRHw/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        },
+        {
+          "id": "hLw4qUBfhVY",
+          "title": "Pop Out (Lyrics)",
+          "artist": "Polo G ft. Lil TJay",
+          "duration": "2:45",
+          "thumbnail": "https://i.ytimg.com/vi/hLw4qUBfhVY/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        },
+        {
+          "id": "rBRTamq0v-Q",
+          "title": "Outside Today",
+          "artist": "YoungBoy Never Broke Again",
+          "duration": "2:10",
+          "thumbnail": "https://i.ytimg.com/vi/rBRTamq0v-Q/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        },
+        {
+          "id": "83xBPCw5hh4",
+          "title": "ROCKSTAR (Audio) ft. Roddy Ricch",
+          "artist": "DaBaby",
+          "duration": "3:02",
+          "thumbnail": "https://i.ytimg.com/vi/83xBPCw5hh4/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        },
+        {
+          "id": "4GFAZBKZVJY",
+          "title": "rockstar ft. 21 Savage (Official Audio)",
+          "artist": "Post Malone",
+          "duration": "3:38",
+          "thumbnail": "https://i.ytimg.com/vi/4GFAZBKZVJY/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        },
+        {
+          "id": "R8vpQdZErbw",
+          "title": "Congratulations",
+          "artist": "Post Malone",
+          "duration": "3:41",
+          "thumbnail": "https://i.ytimg.com/vi/R8vpQdZErbw/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        },
+        {
+          "id": "0j82Oygrol0",
+          "title": "Stir Fry (Official Audio)",
+          "artist": "Migos",
+          "duration": "3:11",
+          "thumbnail": "https://i.ytimg.com/vi/0j82Oygrol0/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        },
+        {
+          "id": "sV2t3tW_JTQ",
+          "title": "Bank Account (Official Audio)",
+          "artist": "21 Savage",
+          "duration": "3:41",
+          "thumbnail": "https://i.ytimg.com/vi/sV2t3tW_JTQ/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        },
+        {
+          "id": "VcyFfcJbyeM",
+          "title": "XO Tour Llif3 (Official Lyric Video)",
+          "artist": "Lil Uzi Vert",
+          "duration": "3:01",
+          "thumbnail": "https://i.ytimg.com/vi/VcyFfcJbyeM/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        },
+        {
+          "id": "LOqGYF0oFIg",
+          "title": "Creepin'",
+          "artist": "Metro Boomin",
+          "duration": "3:42",
+          "thumbnail": "https://i.ytimg.com/vi/LOqGYF0oFIg/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        },
+        {
+          "id": "RLYksQvr5zY",
+          "title": "Magnolia (Audio)",
+          "artist": "Playboi Carti",
+          "duration": "3:01",
+          "thumbnail": "https://i.ytimg.com/vi/RLYksQvr5zY/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        },
+        {
+          "id": "yw-1dAdgID0",
+          "title": "\"NO FLOCKIN\" (Official Audio)",
+          "artist": "Kodak Black",
+          "duration": "2:46",
+          "thumbnail": "https://i.ytimg.com/vi/yw-1dAdgID0/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        },
+        {
+          "id": "vJwKKKd2ZYE",
+          "title": "Hot N*gga (Official Music Video)",
+          "artist": "Bobby Shmurda",
+          "duration": "3:19",
+          "thumbnail": "https://i.ytimg.com/vi/vJwKKKd2ZYE/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rap_trap"
+        }
+      ]
+    },
+    "rock_alt": {
+      "name": "Rock & Alt Crossovers",
+      "icon": "🎸",
+      "tracks": [
+        {
+          "id": "Q3gy8A0jY10",
+          "title": "In The End (Audio)",
+          "artist": "Linkin Park",
+          "duration": "3:38",
+          "thumbnail": "https://i.ytimg.com/vi/Q3gy8A0jY10/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        },
+        {
+          "id": "KIfYtDl4B2g",
+          "title": "Numb (Audio)",
+          "artist": "Linkin Park",
+          "duration": "3:07",
+          "thumbnail": "https://i.ytimg.com/vi/KIfYtDl4B2g/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        },
+        {
+          "id": "pQV0WEdT_OE",
+          "title": "Circles (Official Audio)",
+          "artist": "Post Malone",
+          "duration": "3:36",
+          "thumbnail": "https://i.ytimg.com/vi/pQV0WEdT_OE/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        },
+        {
+          "id": "jfLpVbu5svQ",
+          "title": "Bloody Valentine (Official Audio)",
+          "artist": "Machine Gun Kelly",
+          "duration": "3:26",
+          "thumbnail": "https://i.ytimg.com/vi/jfLpVbu5svQ/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        },
+        {
+          "id": "m8QQR-wQA0I",
+          "title": "Star Shopping (Official Audio)",
+          "artist": "Lil Peep",
+          "duration": "2:23",
+          "thumbnail": "https://i.ytimg.com/vi/m8QQR-wQA0I/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        },
+        {
+          "id": "-jRKsiAOAA8",
+          "title": "Falling Down",
+          "artist": "Lil Peep & XXXTENTACION",
+          "duration": "3:18",
+          "thumbnail": "https://i.ytimg.com/vi/-jRKsiAOAA8/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        },
+        {
+          "id": "rg9wICDu42g",
+          "title": "Can You Feel My Heart",
+          "artist": "Bring Me The Horizon",
+          "duration": "3:49",
+          "thumbnail": "https://i.ytimg.com/vi/rg9wICDu42g/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        },
+        {
+          "id": "s9WxaAHWeK8",
+          "title": "iann dior – emotions (Official Audio)",
+          "artist": "iann dior",
+          "duration": "2:12",
+          "thumbnail": "https://i.ytimg.com/vi/s9WxaAHWeK8/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        },
+        {
+          "id": "fSM2EP7VzgA",
+          "title": "Miss The Rage",
+          "artist": "Trippie Redd",
+          "duration": "3:57",
+          "thumbnail": "https://i.ytimg.com/vi/fSM2EP7VzgA/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        },
+        {
+          "id": "Q6SHkQMFVlc",
+          "title": "Smells Like Teen Spirit",
+          "artist": "Nirvana",
+          "duration": "5:01",
+          "thumbnail": "https://i.ytimg.com/vi/Q6SHkQMFVlc/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        },
+        {
+          "id": "bpOSxM0rNPM",
+          "title": "Do I Wanna Know? (Official Video)",
+          "artist": "Arctic Monkeys",
+          "duration": "4:26",
+          "thumbnail": "https://i.ytimg.com/vi/bpOSxM0rNPM/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        },
+        {
+          "id": "Ao81ziiXHhs",
+          "title": "Sweater Weather",
+          "artist": "The Neighbourhood",
+          "duration": "4:01",
+          "thumbnail": "https://i.ytimg.com/vi/Ao81ziiXHhs/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        },
+        {
+          "id": "Gc4sY98Jn9I",
+          "title": "Stressed Out (Audio)",
+          "artist": "twenty one pilots",
+          "duration": "3:23",
+          "thumbnail": "https://i.ytimg.com/vi/Gc4sY98Jn9I/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        },
+        {
+          "id": "7_zZQazMqrE",
+          "title": "I Write Sins Not Tragedies (Remastered)",
+          "artist": "Panic! At The Disco",
+          "duration": "3:07",
+          "thumbnail": "https://i.ytimg.com/vi/7_zZQazMqrE/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        },
+        {
+          "id": "sZSf5dpZdlI",
+          "title": "Centuries (Audio)",
+          "artist": "Fall Out Boy",
+          "duration": "3:49",
+          "thumbnail": "https://i.ytimg.com/vi/sZSf5dpZdlI/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        },
+        {
+          "id": "IhP3J0j9JmY",
+          "title": "Believer (Audio)",
+          "artist": "Imagine Dragons",
+          "duration": "3:23",
+          "thumbnail": "https://i.ytimg.com/vi/IhP3J0j9JmY/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        },
+        {
+          "id": "MY4eEOB1wSI",
+          "title": "Viva la Vida [HQ]",
+          "artist": "Coldplay",
+          "duration": "4:05",
+          "thumbnail": "https://i.ytimg.com/vi/MY4eEOB1wSI/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        },
+        {
+          "id": "-Fp0aTedjwI",
+          "title": "Feel Good Inc.",
+          "artist": "Gorillaz",
+          "duration": "3:43",
+          "thumbnail": "https://i.ytimg.com/vi/-Fp0aTedjwI/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        },
+        {
+          "id": "6L0LIo35sF4",
+          "title": "Californication (Highest Quality)",
+          "artist": "Red Hot Chili Peppers",
+          "duration": "5:22",
+          "thumbnail": "https://i.ytimg.com/vi/6L0LIo35sF4/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        },
+        {
+          "id": "hBvJyi3fbtA",
+          "title": "Boulevard of Broken Dreams (Official Audio)",
+          "artist": "Green Day",
+          "duration": "4:21",
+          "thumbnail": "https://i.ytimg.com/vi/hBvJyi3fbtA/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        },
+        {
+          "id": "G-I9csAflBs",
+          "title": "Welcome to the Black Parade",
+          "artist": "My Chemical Romance",
+          "duration": "5:15",
+          "thumbnail": "https://i.ytimg.com/vi/G-I9csAflBs/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        },
+        {
+          "id": "ok5BJlAd5-4",
+          "title": "All the Small Things (HQ)",
+          "artist": "Blink 182",
+          "duration": "2:51",
+          "thumbnail": "https://i.ytimg.com/vi/ok5BJlAd5-4/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        },
+        {
+          "id": "pvIJyRkS9y0",
+          "title": "Mr. Brightside HQ (The Killers)",
+          "artist": "Dank Music Channel",
+          "duration": "3:44",
+          "thumbnail": "https://i.ytimg.com/vi/pvIJyRkS9y0/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        },
+        {
+          "id": "yfcclwdaR-w",
+          "title": "Misery Business (Audio)",
+          "artist": "Paramore",
+          "duration": "3:20",
+          "thumbnail": "https://i.ytimg.com/vi/yfcclwdaR-w/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        },
+        {
+          "id": "5jrAbUvYzSU",
+          "title": "Sugar, We're Goin Down [Album Version]",
+          "artist": "Fall Out Boy",
+          "duration": "3:50",
+          "thumbnail": "https://i.ytimg.com/vi/5jrAbUvYzSU/hqdefault.jpg",
+          "source": "youtube",
+          "category": "rock_alt"
+        }
+      ]
+    },
+    "drill_underground": {
+      "name": "Drill & Underground",
+      "icon": "🎤",
+      "tracks": [
+        {
+          "id": "goYgHnsQdtY",
+          "title": "Dior (Official Audio)",
+          "artist": "Pop Smoke",
+          "duration": "3:37",
+          "thumbnail": "https://i.ytimg.com/vi/goYgHnsQdtY/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        },
+        {
+          "id": "qjKecb3pxuU",
+          "title": "WELCOME TO THE PARTY",
+          "artist": "POP SMOKE",
+          "duration": "3:36",
+          "thumbnail": "https://i.ytimg.com/vi/qjKecb3pxuU/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        },
+        {
+          "id": "xf3eAb4l38Y",
+          "title": "BIG DRIP (OFFICIAL VIDEO)",
+          "artist": "FIVIO FOREIGN",
+          "duration": "2:49",
+          "thumbnail": "https://i.ytimg.com/vi/xf3eAb4l38Y/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        },
+        {
+          "id": "RdhjZUUR26c",
+          "title": "Doja (Official Audio)",
+          "artist": "Central Cee",
+          "duration": "1:38",
+          "thumbnail": "https://i.ytimg.com/vi/RdhjZUUR26c/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        },
+        {
+          "id": "xEdDQlmFlu4",
+          "title": "Loading [Lyric Video] Wild West",
+          "artist": "Central Cee",
+          "duration": "2:43",
+          "thumbnail": "https://i.ytimg.com/vi/xEdDQlmFlu4/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        },
+        {
+          "id": "ER8_0MVfxeg",
+          "title": "Took Her To The O (AUDIO)",
+          "artist": "King Von",
+          "duration": "3:18",
+          "thumbnail": "https://i.ytimg.com/vi/ER8_0MVfxeg/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        },
+        {
+          "id": "3GQJqnA0KDw",
+          "title": "Crazy Story (Audio)",
+          "artist": "King Von",
+          "duration": "2:28",
+          "thumbnail": "https://i.ytimg.com/vi/3GQJqnA0KDw/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        },
+        {
+          "id": "L7pRXGRvjc0",
+          "title": "No Suburban, Pt. 2 (Official Audio Visualizer)",
+          "artist": "Sheff G",
+          "duration": "2:34",
+          "thumbnail": "https://i.ytimg.com/vi/L7pRXGRvjc0/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        },
+        {
+          "id": "y1xZ_kAhjMc",
+          "title": "2055 (Official Video)",
+          "artist": "Sleepy Hallow",
+          "duration": "2:03",
+          "thumbnail": "https://i.ytimg.com/vi/y1xZ_kAhjMc/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        },
+        {
+          "id": "Wkd1TqutKys",
+          "title": "PSA (Audio)",
+          "artist": "Kay Flock",
+          "duration": "1:54",
+          "thumbnail": "https://i.ytimg.com/vi/Wkd1TqutKys/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        },
+        {
+          "id": "Iq0b-D24JJ4",
+          "title": "My Everything (OFFICIAL VIDEO)",
+          "artist": "B-Lovee",
+          "duration": "1:52",
+          "thumbnail": "https://i.ytimg.com/vi/Iq0b-D24JJ4/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        },
+        {
+          "id": "izsnQ0SXFyQ",
+          "title": "Woi",
+          "artist": "Digga D",
+          "duration": "3:24",
+          "thumbnail": "https://i.ytimg.com/vi/izsnQ0SXFyQ/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        },
+        {
+          "id": "gYPX5juKBvg",
+          "title": "Body [Music Video] | GRM Daily",
+          "artist": "Russ Millions x Tion Wayne",
+          "duration": "3:12",
+          "thumbnail": "https://i.ytimg.com/vi/gYPX5juKBvg/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        },
+        {
+          "id": "znQriFAMBRs",
+          "title": "Only You Freestyle",
+          "artist": "Headie One x Drake",
+          "duration": "4:10",
+          "thumbnail": "https://i.ytimg.com/vi/znQriFAMBRs/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        },
+        {
+          "id": "UrnACpUhe98",
+          "title": "Homerton B [Music Video] | GRM Daily",
+          "artist": "Unknown T",
+          "duration": "3:11",
+          "thumbnail": "https://i.ytimg.com/vi/UrnACpUhe98/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        },
+        {
+          "id": "wk9-s1FltwI",
+          "title": "Darling",
+          "artist": "D-Block Europe",
+          "duration": "2:24",
+          "thumbnail": "https://i.ytimg.com/vi/wk9-s1FltwI/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        },
+        {
+          "id": "2bFh8KhDuAs",
+          "title": "Rolando (Caught In The Rain) (Official Video)",
+          "artist": "DUSTY LOCANE",
+          "duration": "2:23",
+          "thumbnail": "https://i.ytimg.com/vi/2bFh8KhDuAs/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        },
+        {
+          "id": "8gPVLJj3z3I",
+          "title": "F.N (Official Audio)",
+          "artist": "Lil Tjay",
+          "duration": "3:46",
+          "thumbnail": "https://i.ytimg.com/vi/8gPVLJj3z3I/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        },
+        {
+          "id": "bJE6-uGmjpI",
+          "title": "Whoopty (Audio)",
+          "artist": "CJ",
+          "duration": "2:04",
+          "thumbnail": "https://i.ytimg.com/vi/bJE6-uGmjpI/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        },
+        {
+          "id": "8OtiyVvRytk",
+          "title": "Computers (Audio) ft. Bobby Shmurda",
+          "artist": "Rowdy Rebel",
+          "duration": "5:08",
+          "thumbnail": "https://i.ytimg.com/vi/8OtiyVvRytk/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        },
+        {
+          "id": "Z3abx_ZGFvE",
+          "title": "Suburban [Official Audio]",
+          "artist": "22Gz",
+          "duration": "3:31",
+          "thumbnail": "https://i.ytimg.com/vi/Z3abx_ZGFvE/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        },
+        {
+          "id": "Ny__PSK1iew",
+          "title": "\"Don't Start\" (Music Video) | 🎬 @MeetTheConnectTv Prod By HM8 Beats x JonyBeats",
+          "artist": "Bizzy Banks",
+          "duration": "2:58",
+          "thumbnail": "https://i.ytimg.com/vi/Ny__PSK1iew/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        },
+        {
+          "id": "dIu_-Z-lVZA",
+          "title": "Hit List [Official Audio]",
+          "artist": "CoachDaGhost",
+          "duration": "3:28",
+          "thumbnail": "https://i.ytimg.com/vi/dIu_-Z-lVZA/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        },
+        {
+          "id": "K_hUaDUjGOU",
+          "title": "Warm",
+          "artist": "K-Trap",
+          "duration": "2:41",
+          "thumbnail": "https://i.ytimg.com/vi/K_hUaDUjGOU/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        },
+        {
+          "id": "Ln-ymU5KfAw",
+          "title": "On Deck (Offical Video)",
+          "artist": "Abra Cadabra",
+          "duration": "2:59",
+          "thumbnail": "https://i.ytimg.com/vi/Ln-ymU5KfAw/hqdefault.jpg",
+          "source": "youtube",
+          "category": "drill_underground"
+        }
+      ]
+    },
+    "viral_remix": {
+      "name": "Trending YouTube Viral",
+      "icon": "🔥",
+      "tracks": [
+        {
+          "id": "NpU_aN54eJA",
+          "title": "Jerk [Lyric Video]",
+          "artist": "Oliver Tree",
+          "duration": "2:15",
+          "thumbnail": "https://i.ytimg.com/vi/NpU_aN54eJA/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        },
+        {
+          "id": "iAeBO2qFec4",
+          "title": "Cradles [Official Music Audio]",
+          "artist": "Sub Urban",
+          "duration": "3:40",
+          "thumbnail": "https://i.ytimg.com/vi/iAeBO2qFec4/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        },
+        {
+          "id": "piOIvNO2M8Q",
+          "title": "ily (i love you baby) (feat. Emilee) (Official Audio)",
+          "artist": "Surf Mesa",
+          "duration": "3:02",
+          "thumbnail": "https://i.ytimg.com/vi/piOIvNO2M8Q/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        },
+        {
+          "id": "L7mfjvdnPno",
+          "title": "Falling (Official Music Video)",
+          "artist": "Trevor Daniel",
+          "duration": "2:40",
+          "thumbnail": "https://i.ytimg.com/vi/L7mfjvdnPno/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        },
+        {
+          "id": "2zToEPpFEN8",
+          "title": "Roses (Imanbek Remix) (Official Music Video)",
+          "artist": "SAINt JHN",
+          "duration": "2:58",
+          "thumbnail": "https://i.ytimg.com/vi/2zToEPpFEN8/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        },
+        {
+          "id": "YRNyamyBOIQ",
+          "title": "Astronaut in the Ocean",
+          "artist": "Masked Wolf",
+          "duration": "2:13",
+          "thumbnail": "https://i.ytimg.com/vi/YRNyamyBOIQ/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        },
+        {
+          "id": "o4evZ9foxBk",
+          "title": "Build A B*tch (Official Lyric Video)",
+          "artist": "Bella Poarch",
+          "duration": "2:03",
+          "thumbnail": "https://i.ytimg.com/vi/o4evZ9foxBk/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        },
+        {
+          "id": "0Qd2paEPfh4",
+          "title": "Lalala (Official Audio)",
+          "artist": "Y2K, bbno$",
+          "duration": "2:43",
+          "thumbnail": "https://i.ytimg.com/vi/0Qd2paEPfh4/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        },
+        {
+          "id": "BzCwaKeV8hM",
+          "title": "ROXANNE (Audio)",
+          "artist": "Arizona Zervas",
+          "duration": "2:44",
+          "thumbnail": "https://i.ytimg.com/vi/BzCwaKeV8hM/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        },
+        {
+          "id": "7ysFgElQtjI",
+          "title": "Old Town Road (feat. Billy Ray Cyrus) [Remix]",
+          "artist": "Lil Nas X",
+          "duration": "2:38",
+          "thumbnail": "https://i.ytimg.com/vi/7ysFgElQtjI/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        },
+        {
+          "id": "oqv35UZepIM",
+          "title": "Streets (Official Audio)",
+          "artist": "Doja Cat",
+          "duration": "3:48",
+          "thumbnail": "https://i.ytimg.com/vi/oqv35UZepIM/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        },
+        {
+          "id": "iGU66wsjIPA",
+          "title": "High Fashion (feat. Mustard) [Official Audio]",
+          "artist": "Roddy Ricch",
+          "duration": "3:41",
+          "thumbnail": "https://i.ytimg.com/vi/iGU66wsjIPA/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        },
+        {
+          "id": "EzrM9RJnAhA",
+          "title": "WHATS POPPIN [Official Audio]",
+          "artist": "Jack Harlow",
+          "duration": "2:20",
+          "thumbnail": "https://i.ytimg.com/vi/EzrM9RJnAhA/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        },
+        {
+          "id": "bJE6-uGmjpI",
+          "title": "Whoopty (Audio)",
+          "artist": "CJ",
+          "duration": "2:04",
+          "thumbnail": "https://i.ytimg.com/vi/bJE6-uGmjpI/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        },
+        {
+          "id": "d2-Hkg3loPU",
+          "title": "No More Parties (Prod. Maaly Raw) [Official Audio]",
+          "artist": "Coi Leray ft. Lil Durk",
+          "duration": "3:13",
+          "thumbnail": "https://i.ytimg.com/vi/d2-Hkg3loPU/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        },
+        {
+          "id": "RnGLMCOFjFQ",
+          "title": "Back In Blood (feat. Lil Durk) [Official Audio]",
+          "artist": "Pooh Shiesty",
+          "duration": "3:05",
+          "thumbnail": "https://i.ytimg.com/vi/RnGLMCOFjFQ/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        },
+        {
+          "id": "nJZcZ8TU-fo",
+          "title": "\"Shotta Flow\" (Official Audio)",
+          "artist": "NLE Choppa",
+          "duration": "2:41",
+          "thumbnail": "https://i.ytimg.com/vi/nJZcZ8TU-fo/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        },
+        {
+          "id": "xreinp0-Yj4",
+          "title": "Blueberry Faygo [Audio]",
+          "artist": "Lil Mosey",
+          "duration": "2:44",
+          "thumbnail": "https://i.ytimg.com/vi/xreinp0-Yj4/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        },
+        {
+          "id": "0liraNXoK4U",
+          "title": "Party Girl (Lyrics)",
+          "artist": "StaySolidRocky",
+          "duration": "2:27",
+          "thumbnail": "https://i.ytimg.com/vi/0liraNXoK4U/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        },
+        {
+          "id": "H2elbLimSKU",
+          "title": "Heart On Ice (Lyrics)",
+          "artist": "Rod Wave",
+          "duration": "2:39",
+          "thumbnail": "https://i.ytimg.com/vi/H2elbLimSKU/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        },
+        {
+          "id": "Sevhj75lj80",
+          "title": "Ski [Official Video] | Young Stoner Life",
+          "artist": "Young Thug & Gunna",
+          "duration": "2:35",
+          "thumbnail": "https://i.ytimg.com/vi/Sevhj75lj80/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        },
+        {
+          "id": "jma9h7GgQSk",
+          "title": "Deep End Freestyle (Official Video Release)",
+          "artist": "Sleepy Hallow ft. Fousheé",
+          "duration": "2:05",
+          "thumbnail": "https://i.ytimg.com/vi/jma9h7GgQSk/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        },
+        {
+          "id": "OLi5_8JWoAU",
+          "title": "quicksand (official music video)",
+          "artist": "morray",
+          "duration": "3:47",
+          "thumbnail": "https://i.ytimg.com/vi/OLi5_8JWoAU/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        },
+        {
+          "id": "94zTrkr5_xY",
+          "title": "SPOTEMGOTTEM Feat. Pooh Shiesty \"Beatbox 2\" (Official Video)",
+          "artist": "SPOTEM GOTTEM",
+          "duration": "3:13",
+          "thumbnail": "https://i.ytimg.com/vi/94zTrkr5_xY/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        },
+        {
+          "id": "2wowASwbq-w",
+          "title": "We Paid (Audio)",
+          "artist": "Lil Baby, 42 Dugg",
+          "duration": "3:03",
+          "thumbnail": "https://i.ytimg.com/vi/2wowASwbq-w/hqdefault.jpg",
+          "source": "youtube",
+          "category": "viral_remix"
+        }
+      ]
+    }
+  }
+}

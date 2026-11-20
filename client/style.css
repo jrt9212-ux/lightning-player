@@ -818,6 +818,126 @@ body::after {
   letter-spacing: -0.01em;
 }
 
+/* Discover Category Filter Bar */
+.category-pill-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 8px 2px 14px 2px;
+  margin-top: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(56, 189, 248, 0.35) transparent;
+}
+
+.category-pill-bar::-webkit-scrollbar {
+  height: 4px;
+}
+
+.category-pill-bar::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.35);
+  border-radius: 4px;
+}
+
+.category-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: var(--radius-full);
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.category-pill:hover {
+  color: #fff;
+  background: rgba(56, 189, 248, 0.12);
+  border-color: rgba(56, 189, 248, 0.4);
+  transform: translateY(-1px);
+}
+
+.category-pill.active {
+  color: #fff;
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.3), rgba(37, 99, 235, 0.25));
+  border-color: #38bdf8;
+  box-shadow: 0 0 16px rgba(14, 165, 233, 0.35);
+}
+
+.category-pill .pill-badge {
+  font-size: 0.72rem;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+}
+
+.category-pill.active .pill-badge {
+  background: rgba(56, 189, 248, 0.25);
+  color: #38bdf8;
+}
+
+/* Category Section Header (when viewing All Categories) */
+.category-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 6px 10px 6px;
+  margin-top: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.category-section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.category-section-title .cat-icon {
+  font-size: 1.25rem;
+}
+
+.category-section-count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  letter-spacing: 0.04em;
+}
+
+.category-play-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 15px;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.category-play-btn:hover {
+  background: #38bdf8;
+  color: #040812;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.5);
+  transform: translateY(-1px);
+}
+
 /* Pill Buttons */
 .pill-btn {
   padding: 7px 16px;

@@ -22,7 +22,9 @@
     isShuffling: false,
     currentTrack: null,
     isScrubbing: false,
-    modalTargetTrack: null
+    modalTargetTrack: null,
+    activeCategory: 'all',
+    discoverData: null
   };
 
   const STORAGE_KEYS = {
@@ -48,6 +50,7 @@
     searchClearBtn: document.getElementById('searchClearBtn'),
     searchSubmitBtn: document.getElementById('searchSubmitBtn'),
     trackListContainer: document.getElementById('trackListContainer'),
+    categoryPillBar: document.getElementById('categoryPillBar'),
     loader: document.getElementById('loader'),
     loaderText: document.getElementById('loaderText'),
     viewTitle: document.getElementById('viewTitle'),
@@ -382,6 +385,8 @@
   function setSource(source) {
     if (state.activeSource === source) return;
     state.activeSource = source;
+    state.activeCategory = 'all';
+    state.discoverData = null;
 
     if (source === 'youtube') {
       elements.sourceBtnYouTube.classList.add('active');
@@ -439,44 +444,52 @@
     elements.deletePlaylistBtn.style.display = 'none';
 
     if (tab === 'discover') {
+      if (elements.categoryPillBar) elements.categoryPillBar.style.display = 'flex';
       const sourceLabel = state.activeSource === 'youtube' ? 'YouTube Discovery' : 'Spotify Discovery';
       elements.viewTitle.textContent = sourceLabel;
       elements.viewSubtitle.textContent = state.activeSource === 'youtube'
         ? 'Hip-hop, trap, rap & street anthems'
         : 'Pop, R&B & mainstream chart hits';
       const currentSource = (state.currentList && state.currentList[0]) ? state.currentList[0].source : null;
-      if (!state.currentList || state.currentList.length === 0 || currentSource !== state.activeSource) {
+      if (!state.discoverData || currentSource !== state.activeSource) {
         loadPopularTracks();
       } else {
-        renderTrackList(state.currentList, false);
+        renderCategoryPills();
+        renderDiscoverContent();
       }
-    } else if (tab === 'queue') {
-      elements.viewTitle.textContent = 'Current Queue';
-      elements.viewSubtitle.textContent = `${state.queue.length} track(s) in queue`;
-      elements.clearQueueBtn.style.display = state.queue.length > 0 ? 'inline-block' : 'none';
-      renderTrackList(state.queue, true);
-    } else if (tab === 'liked') {
-      elements.viewTitle.textContent = 'Liked Songs';
-      elements.viewSubtitle.textContent = `${state.likedSongs.length} track(s) • Auto-saved`;
-      elements.playlistPlayAllBtn.style.display = state.likedSongs.length > 0 ? 'inline-flex' : 'none';
-      renderTrackList(state.likedSongs, false, true);
-    } else if (tab.startsWith('pl_')) {
-      const pl = state.playlists.find(p => p.id === tab);
-      if (!pl) {
-        switchTab('discover');
-        return;
+    } else {
+      if (elements.categoryPillBar) elements.categoryPillBar.style.display = 'none';
+      if (tab === 'queue') {
+        elements.viewTitle.textContent = 'Current Queue';
+        elements.viewSubtitle.textContent = `${state.queue.length} track(s) in queue`;
+        elements.clearQueueBtn.style.display = state.queue.length > 0 ? 'inline-block' : 'none';
+        renderTrackList(state.queue, true);
+      } else if (tab === 'liked') {
+        elements.viewTitle.textContent = 'Liked Songs';
+        elements.viewSubtitle.textContent = `${state.likedSongs.length} track(s) • Auto-saved`;
+        elements.playlistPlayAllBtn.style.display = state.likedSongs.length > 0 ? 'inline-flex' : 'none';
+        renderTrackList(state.likedSongs, false, true);
+      } else if (tab.startsWith('pl_')) {
+        const pl = state.playlists.find(p => p.id === tab);
+        if (!pl) {
+          switchTab('discover');
+          return;
+        }
+        elements.viewTitle.textContent = pl.name;
+        elements.viewSubtitle.textContent = `${pl.tracks.length} track(s) • Custom Playlist`;
+        elements.playlistPlayAllBtn.style.display = pl.tracks.length > 0 ? 'inline-flex' : 'none';
+        elements.deletePlaylistBtn.style.display = 'inline-block';
+        renderTrackList(pl.tracks, false, false, pl.id);
       }
-      elements.viewTitle.textContent = pl.name;
-      elements.viewSubtitle.textContent = `${pl.tracks.length} track(s) • Custom Playlist`;
-      elements.playlistPlayAllBtn.style.display = pl.tracks.length > 0 ? 'inline-flex' : 'none';
-      elements.deletePlaylistBtn.style.display = 'inline-block';
-      renderTrackList(pl.tracks, false, false, pl.id);
     }
   }
 
   // Render Tracks to UI
-  function renderTrackList(tracks, isQueueView = false, isLikedView = false, playlistId = null) {
-    elements.trackListContainer.innerHTML = '';
+  function renderTrackList(tracks, isQueueView = false, isLikedView = false, playlistId = null, targetContainer = null) {
+    const container = targetContainer || elements.trackListContainer;
+    if (!targetContainer) {
+      container.innerHTML = '';
+    }
 
     if (!tracks || tracks.length === 0) {
       let emptyMsg = 'No tracks found. Try searching for a song or artist above.';
@@ -484,7 +497,7 @@
       else if (isLikedView) emptyMsg = 'No liked songs yet. Click the heart icon on any track to add it here!';
       else if (playlistId) emptyMsg = 'This playlist is empty. Search for songs and click the playlist icon to add them.';
 
-      elements.trackListContainer.innerHTML = `
+      container.innerHTML = `
         <div style="text-align: center; padding: 60px 0; color: var(--text-dim); font-size: 0.95rem;">
           ${emptyMsg}
         </div>
@@ -594,11 +607,11 @@
         }
       }
 
-      elements.trackListContainer.appendChild(row);
+      container.appendChild(row);
     });
 
     // Proactively pre-warm top 2 tracks in the newly rendered list for instant zero-delay playback
-    if (tracks && tracks.length > 0) {
+    if (!targetContainer && tracks && tracks.length > 0) {
       for (const t of tracks.slice(0, 2)) {
         if (t && t.id) {
           fetch(`/api/preload?id=${encodeURIComponent(t.id)}&title=${encodeURIComponent(t.title || '')}&artist=${encodeURIComponent(t.artist || '')}`).catch(() => {});
@@ -607,9 +620,237 @@
     }
   }
 
-  // Load Popular Tracks
+  // Category Icon Resolver
+  function getCategoryIcon(catId) {
+    const icons = {
+      for_you: '✨',
+      all: '🔥',
+      rap_trap: '⚡',
+      drill_underground: '🎤',
+      chill_lofi: '🌙',
+      rock_alt: '🎸',
+      viral_remix: '🔥',
+      pop_hits: '🌟',
+      hiphop_central: '💎',
+      rnb_soul: '🔮',
+      latin_fire: '🌴',
+      edm_dance: '⚡'
+    };
+    return icons[catId] || '🎵';
+  }
+
+  // Batch Play All Songs In A Category
+  function playCategoryBatch(tracks, catName) {
+    if (!tracks || tracks.length === 0) return;
+    state.queue = tracks.slice(1).map(t => ({ ...t }));
+    updateQueueUI();
+    playTrackImmediately(tracks[0]);
+  }
+
+  // Render Horizontal Category Filter Pills
+  function renderCategoryPills() {
+    if (!elements.categoryPillBar) return;
+    if (state.activeTab !== 'discover') {
+      elements.categoryPillBar.style.display = 'none';
+      return;
+    }
+    elements.categoryPillBar.style.display = 'flex';
+    elements.categoryPillBar.innerHTML = '';
+
+    if (!state.discoverData || !state.discoverData.categories) return;
+
+    // 1. "All Categories" pill
+    const allPill = document.createElement('button');
+    allPill.className = `category-pill ${state.activeCategory === 'all' ? 'active' : ''}`;
+    allPill.dataset.catId = 'all';
+    let totalTracks = 0;
+    Object.values(state.discoverData.categories).forEach(c => {
+      totalTracks += (c.tracks ? c.tracks.length : 0);
+    });
+    allPill.innerHTML = `<span>🔥 All Categories</span><span class="pill-badge">${totalTracks}</span>`;
+    allPill.addEventListener('click', () => {
+      state.activeCategory = 'all';
+      updateActivePillClass();
+      renderDiscoverContent();
+    });
+    elements.categoryPillBar.appendChild(allPill);
+
+    // 2. "Made For You" pill (if available)
+    if (state.discoverData.for_you && state.discoverData.for_you.length > 0) {
+      const forYouPill = document.createElement('button');
+      forYouPill.className = `category-pill ${state.activeCategory === 'for_you' ? 'active' : ''}`;
+      forYouPill.dataset.catId = 'for_you';
+      forYouPill.innerHTML = `<span>✨ Made For You</span><span class="pill-badge">${state.discoverData.for_you.length}</span>`;
+      forYouPill.addEventListener('click', () => {
+        state.activeCategory = 'for_you';
+        updateActivePillClass();
+        renderDiscoverContent();
+      });
+      elements.categoryPillBar.appendChild(forYouPill);
+    }
+
+    // 3. Platform Category Pills (25 tracks each)
+    Object.entries(state.discoverData.categories).forEach(([catId, catInfo]) => {
+      const pill = document.createElement('button');
+      pill.className = `category-pill ${state.activeCategory === catId ? 'active' : ''}`;
+      pill.dataset.catId = catId;
+      const icon = getCategoryIcon(catId);
+      const count = (catInfo.tracks && catInfo.tracks.length) || 0;
+      pill.innerHTML = `<span>${icon} ${catInfo.name}</span><span class="pill-badge">${count}</span>`;
+      pill.addEventListener('click', () => {
+        state.activeCategory = catId;
+        updateActivePillClass();
+        renderDiscoverContent();
+      });
+      elements.categoryPillBar.appendChild(pill);
+    });
+  }
+
+  function updateActivePillClass() {
+    if (!elements.categoryPillBar) return;
+    elements.categoryPillBar.querySelectorAll('.category-pill').forEach(pill => {
+      if (pill.dataset.catId === state.activeCategory) {
+        pill.classList.add('active');
+      } else {
+        pill.classList.remove('active');
+      }
+    });
+  }
+
+  // Render Categorized Sections or Single Category View
+  function renderDiscoverContent() {
+    if (!state.discoverData) return;
+    elements.trackListContainer.innerHTML = '';
+
+    const sourceName = state.activeSource === 'spotify' ? 'Spotify' : 'YouTube';
+
+    if (state.activeCategory === 'all') {
+      elements.viewTitle.textContent = `${sourceName} Discovery`;
+      elements.viewSubtitle.textContent = state.activeSource === 'youtube'
+        ? '5 Curated Categories • 25 Tracks Each + Personalized Picks'
+        : '5 Chart Categories • 25 Tracks Each + Personalized Picks';
+
+      // Section 1: Made For You
+      if (state.discoverData.for_you && state.discoverData.for_you.length > 0) {
+        const forYouHeader = document.createElement('div');
+        forYouHeader.className = 'category-section-header';
+        forYouHeader.innerHTML = `
+          <div class="category-section-title">
+            <span class="cat-icon">✨</span>
+            <span>Made For You</span>
+            <span class="category-section-count">${state.discoverData.for_you.length} TRACKS</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span style="font-size: 0.8rem; color: var(--text-dim);">${state.discoverData.for_you_reason || 'Similar to songs you listen to'}</span>
+            <button class="category-play-btn" id="playMixBtn">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+              Play Mix
+            </button>
+          </div>
+        `;
+        elements.trackListContainer.appendChild(forYouHeader);
+        forYouHeader.querySelector('#playMixBtn').addEventListener('click', () => {
+          playCategoryBatch(state.discoverData.for_you, 'Made For You');
+        });
+
+        const forYouBox = document.createElement('div');
+        forYouBox.className = 'category-track-group';
+        elements.trackListContainer.appendChild(forYouBox);
+        renderTrackList(state.discoverData.for_you, false, false, null, forYouBox);
+      }
+
+      // Section 2..6: Each of the 5 categories
+      if (state.discoverData.categories) {
+        Object.entries(state.discoverData.categories).forEach(([catId, catInfo]) => {
+          const catHeader = document.createElement('div');
+          catHeader.className = 'category-section-header';
+          const icon = getCategoryIcon(catId);
+          const count = catInfo.tracks ? catInfo.tracks.length : 0;
+          catHeader.innerHTML = `
+            <div class="category-section-title">
+              <span class="cat-icon">${icon}</span>
+              <span>${catInfo.name}</span>
+              <span class="category-section-count">${count} TRACKS</span>
+            </div>
+            <button class="category-play-btn">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+              Play Category
+            </button>
+          `;
+          elements.trackListContainer.appendChild(catHeader);
+          catHeader.querySelector('.category-play-btn').addEventListener('click', () => {
+            playCategoryBatch(catInfo.tracks, catInfo.name);
+          });
+
+          const catBox = document.createElement('div');
+          catBox.className = 'category-track-group';
+          elements.trackListContainer.appendChild(catBox);
+          renderTrackList(catInfo.tracks, false, false, null, catBox);
+        });
+      }
+      return;
+    }
+
+    if (state.activeCategory === 'for_you') {
+      elements.viewTitle.textContent = '✨ Made For You';
+      elements.viewSubtitle.textContent = state.discoverData.for_you_reason || 'Similar to songs you listen to';
+
+      const forYouHeader = document.createElement('div');
+      forYouHeader.className = 'category-section-header';
+      forYouHeader.style.marginTop = '0px';
+      forYouHeader.innerHTML = `
+        <div class="category-section-title">
+          <span class="cat-icon">✨</span>
+          <span>Personalized Mix</span>
+          <span class="category-section-count">${state.discoverData.for_you ? state.discoverData.for_you.length : 0} TRACKS</span>
+        </div>
+        <button class="category-play-btn" id="playMixBtnSingle">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+          Play Mix
+        </button>
+      `;
+      elements.trackListContainer.appendChild(forYouHeader);
+      forYouHeader.querySelector('#playMixBtnSingle').addEventListener('click', () => {
+        playCategoryBatch(state.discoverData.for_you, 'Made For You');
+      });
+
+      renderTrackList(state.discoverData.for_you || [], false, false, null, elements.trackListContainer);
+      return;
+    }
+
+    // Specific category
+    const cat = state.discoverData.categories ? state.discoverData.categories[state.activeCategory] : null;
+    if (cat) {
+      const icon = getCategoryIcon(state.activeCategory);
+      elements.viewTitle.textContent = `${icon} ${cat.name}`;
+      elements.viewSubtitle.textContent = cat.description || `${cat.tracks ? cat.tracks.length : 25} hand-picked tracks`;
+
+      const catHeader = document.createElement('div');
+      catHeader.className = 'category-section-header';
+      catHeader.style.marginTop = '0px';
+      catHeader.innerHTML = `
+        <div class="category-section-title">
+          <span class="cat-icon">${icon}</span>
+          <span>${cat.name}</span>
+          <span class="category-section-count">${cat.tracks ? cat.tracks.length : 0} TRACKS</span>
+        </div>
+        <button class="category-play-btn" id="playCatBtnSingle">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+          Play Category
+        </button>
+      `;
+      elements.trackListContainer.appendChild(catHeader);
+      catHeader.querySelector('#playCatBtnSingle').addEventListener('click', () => {
+        playCategoryBatch(cat.tracks, cat.name);
+      });
+
+      renderTrackList(cat.tracks || [], false, false, null, elements.trackListContainer);
+    }
+  }
+
+  // Load Discover Categories and For You Mix
   async function loadPopularTracks() {
-    showLoader(true, 'Loading popular tracks...');
+    showLoader(true, 'Loading discover categories...');
     try {
       const sourceLabel = state.activeSource === 'youtube' ? 'YouTube Discovery' : 'Spotify Discovery';
       elements.viewTitle.textContent = sourceLabel;
@@ -617,29 +858,45 @@
         ? 'Hip-hop, trap, rap & street anthems'
         : 'Pop, R&B & mainstream chart hits';
 
-      const res = await fetch(`/api/popular?source=${state.activeSource}`);
+      const res = await fetch(`/api/discover?source=${state.activeSource}`);
       const data = await res.json();
-      state.currentList = data.tracks || [];
+      state.discoverData = data;
+
+      // Flatten tracks into state.currentList for autoplay / indexing
+      let allTracks = [];
+      if (data.for_you && Array.isArray(data.for_you)) {
+        allTracks.push(...data.for_you);
+      }
+      if (data.categories) {
+        Object.values(data.categories).forEach(cat => {
+          if (cat.tracks && Array.isArray(cat.tracks)) {
+            allTracks.push(...cat.tracks);
+          }
+        });
+      }
+      state.currentList = allTracks;
+
       if (data.dead_tracks && Array.isArray(data.dead_tracks)) {
-        const featuredIds = new Set((data.tracks || []).map(t => t.id));
+        const featuredIds = new Set(allTracks.map(t => t.id));
         data.dead_tracks.forEach(id => {
           if (!featuredIds.has(id)) {
             deadTracksSet.add(id);
           }
         });
       }
-      renderTrackList(state.currentList);
 
-      // Pre-buffer top 3 songs into standbyDeck for instant playback!
+      renderCategoryPills();
+      renderDiscoverContent();
+
+      // Pre-buffer top tracks into standbyDeck for instant playback!
       if (state.currentList.length > 0 && !state.isPlaying && !state.currentTrack) {
         preloadNextTrack(state.currentList[0]);
-        // also warm 2nd and 3rd
         for (const t of state.currentList.slice(1, 3)) {
           if (t && t.id) fetch(`/api/preload?id=${encodeURIComponent(t.id)}&title=${encodeURIComponent(t.title||'')}&artist=${encodeURIComponent(t.artist||'')}`).catch(()=>{});
         }
       }
     } catch (e) {
-      console.error('Failed to load popular tracks:', e);
+      console.error('Failed to load discover categories:', e);
       renderTrackList([]);
     } finally {
       showLoader(false);
@@ -649,8 +906,15 @@
   // Execute Search
   async function executeSearch(query) {
     if (!query.trim()) {
+      if (elements.categoryPillBar && state.activeTab === 'discover') {
+        elements.categoryPillBar.style.display = 'flex';
+      }
       loadPopularTracks();
       return;
+    }
+
+    if (elements.categoryPillBar) {
+      elements.categoryPillBar.style.display = 'none';
     }
 
     showLoader(true, `Searching ${state.activeSource.toUpperCase()} for "${query}"...`);

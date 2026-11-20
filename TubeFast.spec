@@ -5,7 +5,7 @@ a = Analysis(
     ['app.py'],
     pathex=[],
     binaries=[],
-    datas=[('client', 'client'), ('icon.ico', '.'), ('icon.png', '.')],
+    datas=[('client', 'client'), ('icon.ico', '.'), ('icon.png', '.'), ('categories_catalog.json', '.')],
     hiddenimports=['webview', 'clr_loader', 'pythonnet', 'cffi'],
     hookspath=[],
     hooksconfig={},

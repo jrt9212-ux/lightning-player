@@ -104,6 +104,16 @@
     topNav: document.querySelector('.top-nav')
   };
 
+  // Range Slider Fill Utility (--pct for custom CSS progress fill)
+  function updateSliderFill(slider) {
+    if (!slider) return;
+    const min = parseFloat(slider.min) || 0;
+    const max = parseFloat(slider.max) || 100;
+    const val = parseFloat(slider.value) || 0;
+    const pct = Math.max(0, Math.min(100, ((val - min) / (max - min)) * 100));
+    slider.style.setProperty('--pct', pct + '%');
+  }
+
   // Persistent Disk & Local Storage Sync
   let libraryLoadedFromDisk = false;
   let saveDiskTimeout = null;
@@ -1225,6 +1235,13 @@
     }
 
     updateNowPlayingMeta(track);
+    if (elements.progressBar) {
+      elements.progressBar.value = 0;
+      updateSliderFill(elements.progressBar);
+    }
+    if (elements.currentTimeLabel) {
+      elements.currentTimeLabel.textContent = '0:00';
+    }
     elements.pipelineStatus.textContent = track.reason ? `✨ ${track.reason}` : (track.source === 'spotify' ? 'Spotify Direct' : 'YouTube Direct');
     elements.engineBadge.textContent = 'Streaming';
     currentDeck.volume = sliderToPerceptualVolume(state.volume);
@@ -1394,6 +1411,13 @@
     }
 
     updateNowPlayingMeta(track);
+    if (elements.progressBar) {
+      elements.progressBar.value = 0;
+      updateSliderFill(elements.progressBar);
+    }
+    if (elements.currentTimeLabel) {
+      elements.currentTimeLabel.textContent = '0:00';
+    }
 
     const streamUrl = `/api/stream?id=${encodeURIComponent(track.id)}&title=${encodeURIComponent(track.title || '')}&artist=${encodeURIComponent(track.artist || '')}`;
     elements.pipelineStatus.textContent = track.reason ? `✨ ${track.reason}` : 'Streaming direct...';
@@ -1565,7 +1589,10 @@
     const gain = sliderToPerceptualVolume(state.volume);
     deckA.volume = gain;
     deckB.volume = gain;
-    elements.volumeBar.value = state.volume;
+    if (elements.volumeBar) {
+      elements.volumeBar.value = state.volume;
+      updateSliderFill(elements.volumeBar);
+    }
 
     if (state.volume === 0) {
       state.isMuted = true;
@@ -1658,6 +1685,7 @@
         if (dur > 0) {
           elements.totalTimeLabel.textContent = formatTime(dur);
           elements.progressBar.value = (cur / dur) * 100;
+          updateSliderFill(elements.progressBar);
         }
       });
 
@@ -1864,6 +1892,7 @@
         const target = (parseFloat(e.target.value) / 100) * dur;
         elements.currentTimeLabel.textContent = formatTime(target);
       }
+      updateSliderFill(e.target);
     });
 
     elements.progressBar.addEventListener('change', (e) => {
@@ -1872,6 +1901,7 @@
         const target = (parseFloat(e.target.value) / 100) * dur;
         elements.audioEngine.currentTime = target;
       }
+      updateSliderFill(e.target);
       state.isScrubbing = false;
     });
 
@@ -2013,21 +2043,13 @@
     setVolume(state.volume);
     loadPopularTracks();
 
-    // Slider fill via --pct CSS custom property
-    function updateSliderFill(slider) {
-      if (!slider) return;
-      const pct = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
-      slider.style.setProperty('--pct', pct + '%');
+    // Initialize slider fills via top-level updateSliderFill
+    if (elements.progressBar) {
+      elements.progressBar.value = 0;
+      updateSliderFill(elements.progressBar);
     }
-    const progressBarEl = document.getElementById('progressBar');
-    const volumeBarEl = document.getElementById('volumeBar');
-    if (progressBarEl) {
-      progressBarEl.addEventListener('input', (e) => updateSliderFill(e.target));
-      updateSliderFill(progressBarEl);
-    }
-    if (volumeBarEl) {
-      volumeBarEl.addEventListener('input', (e) => updateSliderFill(e.target));
-      updateSliderFill(volumeBarEl);
+    if (elements.volumeBar) {
+      updateSliderFill(elements.volumeBar);
     }
 
     // Heartbeat to keep backend server alive while app window is open

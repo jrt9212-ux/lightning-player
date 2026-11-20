@@ -7,3 +7,4 @@ tubefast.log
 tubefast_cache.json
 tubefast_dead.json
 tubefast_library.json
+*.zip

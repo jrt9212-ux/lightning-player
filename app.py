@@ -79,7 +79,7 @@ IS_MAXIMIZED = False
 CLOSING = False
 CLOSING_LOCK = threading.Lock()
 
-APP_VERSION = "1.1.4"
+APP_VERSION = "1.1.5"
 
 UPDATE_STATE = {
     "current_version": APP_VERSION,

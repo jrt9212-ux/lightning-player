@@ -24,6 +24,7 @@ exe = EXE(
     [],
     name='Lightning Player',
     icon='icon.ico',
+    version='version_info.txt',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

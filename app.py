@@ -79,7 +79,7 @@ IS_MAXIMIZED = False
 CLOSING = False
 CLOSING_LOCK = threading.Lock()
 
-APP_VERSION = "1.0.1"
+APP_VERSION = "1.1.1"
 
 UPDATE_STATE = {
     "current_version": APP_VERSION,
@@ -235,9 +235,27 @@ def execute_windows_swap_and_restart(new_exe_path):
     else:
         target_exe = os.path.abspath("Lightning Player.exe")
 
+    # Unblock downloaded file immediately to prevent SmartScreen Mark-of-the-Web issues
+    try:
+        subprocess.run(
+            ["powershell", "-NoProfile", "-Command", f"Unblock-File -LiteralPath '{new_exe_path}'"],
+            capture_output=True, timeout=5
+        )
+    except Exception:
+        pass
+
     bat_path = os.path.join(tempfile.gettempdir(), f"lp_restart_{int(time.time())}.bat")
+    # Explicitly clear all PyInstaller bootloader environment variables so child doesn't check defunct parent PID
     bat_content = f"""@echo off
 chcp 65001 >nul
+set _MEIPASS2=
+set _MEIPASS=
+set _PYI_APPLICATION_HOME_DIR=
+set _PYI_PARENT_PROCESS_LEVEL=
+set _PYI_ARCHIVE_FILE=
+set _PYI_SPLASH_IPC=
+set PYINSTALLER_RESET_ENVIRONMENT=
+set PYINSTALLER_STRICT_UNPACK_MODE=
 timeout /t 2 /nobreak >nul
 :loop
 move /y "{new_exe_path}" "{target_exe}" >nul 2>&1
@@ -245,14 +263,21 @@ if errorlevel 1 (
     timeout /t 1 /nobreak >nul
     goto loop
 )
-start "" "{target_exe}"
+powershell -NoProfile -Command "Unblock-File -LiteralPath '{target_exe}'; Start-Process -FilePath '{target_exe}'"
 del "%~f0" >nul 2>&1
 """
     try:
         with open(bat_path, "w", encoding="utf-8") as f:
             f.write(bat_content)
+
+        # Remove PyInstaller variables from environment passed to detached cmd.exe
+        clean_env = os.environ.copy()
+        for k in list(clean_env.keys()):
+            if k.startswith("_PYI") or k.startswith("_MEI") or "PYINSTALLER" in k:
+                clean_env.pop(k, None)
+
         DETACHED_PROCESS = 0x00000008 | 0x00000200
-        subprocess.Popen(["cmd.exe", "/c", bat_path], creationflags=DETACHED_PROCESS, close_fds=True)
+        subprocess.Popen(["cmd.exe", "/c", bat_path], env=clean_env, creationflags=DETACHED_PROCESS, close_fds=True)
         log("Dispatched detached updater batch runner. Terminating host application.")
     except Exception as e:
         log(f"Error launching restart batch: {e}")

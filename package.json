@@ -1,0 +1,12 @@
+{
+  "name": "tubefast-web",
+  "version": "1.0.0",
+  "description": "Lightweight multi-source streaming audio player routing through YouTube and Spotify",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js"
+  },
+  "keywords": ["music", "player", "youtube", "spotify", "tubefast"],
+  "author": "",
+  "license": "MIT"
+}

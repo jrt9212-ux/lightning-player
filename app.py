@@ -79,7 +79,7 @@ IS_MAXIMIZED = False
 CLOSING = False
 CLOSING_LOCK = threading.Lock()
 
-APP_VERSION = "1.1.5"
+APP_VERSION = "1.1.6"
 
 UPDATE_STATE = {
     "current_version": APP_VERSION,
@@ -874,25 +874,10 @@ def save_stream_cache():
         log(f"Stream cache save error: {e}")
 
 def load_dead_cache():
-    try:
-        if os.path.exists(DEAD_TRACKS_FILE):
-            with open(DEAD_TRACKS_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                if isinstance(data, list):
-                    clean_data = [x for x in data if x not in FEATURED_TRACK_IDS]
-                    DEAD_TRACK_CACHE.clear()
-                    DEAD_TRACK_CACHE.update(clean_data)
-            log(f"Loaded {len(DEAD_TRACK_CACHE)} quarantined dead track IDs from disk")
-    except Exception as e:
-        log(f"Dead cache load error: {e}")
+    DEAD_TRACK_CACHE.clear()
 
 def save_dead_cache():
-    try:
-        with open(DEAD_TRACKS_FILE, "w", encoding="utf-8") as f:
-            clean_list = [x for x in DEAD_TRACK_CACHE if x not in FEATURED_TRACK_IDS]
-            json.dump(clean_list, f)
-    except Exception as e:
-        log(f"Dead cache save error: {e}")
+    pass
 
 # Pre-load caches on boot
 load_stream_cache()
@@ -1396,22 +1381,25 @@ def resolve_spotify_to_yt(title, artist):
     return None
 
 def get_audio_stream_url(video_id):
-    """Resolve direct playable m4a/aac or webm audio stream URL."""
+    """Resolve direct playable audio stream URL using multi-client extraction."""
     now = time.time()
-    if video_id in DEAD_TRACK_CACHE:
-        return None
     if video_id in STREAM_CACHE:
         url, exp = STREAM_CACHE[video_id]
         if now < exp:
             return url
 
     ydl_opts = {
-        'format': '140/bestaudio[ext=m4a]/bestaudio',
+        'format': 'ba[ext=m4a]/140/ba/b[height<=480]/18/best',
         'quiet': True,
         'no_warnings': True,
         'skip_download': True,
         'ignoreerrors': True,
         'noplaylist': True,
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['android', 'ios', 'web']
+            }
+        }
     }
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -1421,36 +1409,24 @@ def get_audio_stream_url(video_id):
                 STREAM_CACHE[video_id] = (stream_url, now + (3600 * 5))
                 save_stream_cache()
                 return stream_url
-            if video_id not in FEATURED_TRACK_IDS:
-                DEAD_TRACK_CACHE.add(video_id)
-                STREAM_CACHE.pop(video_id, None)
-                save_dead_cache()
             return None
     except Exception as e:
         log(f"Stream resolution failure for {video_id}: {e}")
-        if video_id not in FEATURED_TRACK_IDS and ("unavailable" in str(e).lower() or "private" in str(e).lower()):
-            DEAD_TRACK_CACHE.add(video_id)
-            STREAM_CACHE.pop(video_id, None)
-            save_dead_cache()
         return None
 
 def warmup_stream_cache(vid, title="", artist=""):
     """Asynchronously resolve direct stream URL and store in STREAM_CACHE before playback."""
     try:
-        if vid in DEAD_TRACK_CACHE:
-            return
         if vid in STREAM_CACHE:
             _, exp = STREAM_CACHE[vid]
             if time.time() < exp:
                 return
+
         if vid.startswith("sp-") or (not vid.isalnum() and len(vid) != 11):
             resolved_id = resolve_spotify_to_yt(title, artist)
             if resolved_id:
                 vid = resolved_id
             else:
-                if vid not in FEATURED_TRACK_IDS:
-                    DEAD_TRACK_CACHE.add(vid)
-                    save_dead_cache()
                 return
         get_audio_stream_url(vid)
         log(f"Pre-warmed audio stream cache for track {vid}")
@@ -1564,12 +1540,27 @@ class DualStreamHandler(http.server.SimpleHTTPRequestHandler):
 
                     # Stream data in 64KB chunks directly into the browser audio engine
                     while True:
-                        chunk = upstream.read(65536)
+                        try:
+                            chunk = upstream.read(65536)
+                        except Exception:
+                            break
                         if not chunk:
                             break
-                        self.wfile.write(chunk)
+                        try:
+                            self.wfile.write(chunk)
+                        except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError):
+                            break
+                        except Exception as ce:
+                            if "10053" in str(ce) or "10054" in str(ce):
+                                break
+                            raise
+                return
+            except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError):
                 return
             except Exception as e:
+                err_str = str(e)
+                if "10053" in err_str or "10054" in err_str:
+                    return
                 log(f"Stream proxy error for {vid}: {e}")
                 try:
                     self.send_error(500, f"Streaming error: {e}")
@@ -1638,17 +1629,11 @@ class DualStreamHandler(http.server.SimpleHTTPRequestHandler):
 
         # 2b. Quarantine dead/unplayable track endpoint
         if parsed.path == "/api/dead_track":
-            vid = params.get("id", [""])[0]
-            if vid and vid not in FEATURED_TRACK_IDS:
-                DEAD_TRACK_CACHE.add(vid)
-                STREAM_CACHE.pop(vid, None)
-                save_dead_cache()
-                log(f"Quarantined unplayable track ID {vid}")
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
-            self.wfile.write(b'{"status":"quarantined"}')
+            self.wfile.write(b'{"status":"ok"}')
             return
 
         # 2c. Check / Status of Update

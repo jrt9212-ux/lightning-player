@@ -886,14 +886,7 @@
       }
       state.currentList = allTracks;
 
-      if (data.dead_tracks && Array.isArray(data.dead_tracks)) {
-        const featuredIds = new Set(allTracks.map(t => t.id));
-        data.dead_tracks.forEach(id => {
-          if (!featuredIds.has(id)) {
-            deadTracksSet.add(id);
-          }
-        });
-      }
+      deadTracksSet.clear();
 
       renderCategoryPills();
       renderDiscoverContent();
@@ -1033,11 +1026,6 @@
   // Pre-buffer upcoming track audio bytes on standbyDeck in background while current song plays
   function preloadNextTrack(track) {
     if (!track || !track.id) return;
-    if (deadTracksSet.has(track.id) || track.unplayable) {
-      console.warn(`[Preloader] Skipping unplayable track: ${track.title} (${track.id})`);
-      ensureNextTrackPreloaded();
-      return;
-    }
     if (preloadedTrack && preloadedTrack.id === track.id && isStandbyReady) return;
 
     preloadedTrack = track;
@@ -1048,24 +1036,10 @@
       isStandbyReady = true;
     };
 
-    standbyDeck.onerror = (e) => {
-      console.warn(`[Preloader] Standby track unplayable: ${track.title} (${track.id}). Quarantining.`);
+    standbyDeck.onerror = () => {
+      // Background preload was aborted or interrupted; reset standby readiness
       isStandbyReady = false;
       preloadedTrack = null;
-      deadTracksSet.add(track.id);
-      track.unplayable = true;
-
-      fetch(`/api/dead_track?id=${encodeURIComponent(track.id)}`).catch(() => {});
-
-      if (smartAutoplayQueue.length > 0 && smartAutoplayQueue[0].id === track.id) {
-        smartAutoplayQueue.shift();
-      }
-      if (state.queue.length > 0 && state.queue[0].id === track.id) {
-        state.queue.shift();
-        updateQueueUI();
-      }
-
-      ensureNextTrackPreloaded();
     };
 
     // 1. Warm up backend cache so stream URL is ready in 0ms
@@ -1262,33 +1236,50 @@
   }
 
   // Gracefully handles deck playback error without rapid skips or freezing
+  let consecutiveErrorCount = 0;
+  let lastErrorTimestamp = 0;
+
   function handleDeckPlaybackError(track) {
     if (!track) return;
-    console.warn(`[Deck] Playback error on track: ${track.title} (${track.id}). Quarantining.`);
-    deadTracksSet.add(track.id);
-    track.unplayable = true;
-    fetch(`/api/dead_track?id=${encodeURIComponent(track.id)}`).catch(() => {});
+    const now = Date.now();
+    if (now - lastErrorTimestamp < 2500) {
+      consecutiveErrorCount++;
+    } else {
+      consecutiveErrorCount = 1;
+    }
+    lastErrorTimestamp = now;
 
-    elements.pipelineStatus.textContent = '✨ Finding next playable song...';
+    if (consecutiveErrorCount > 2) {
+      console.warn('[Deck] Rapid playback errors detected. Stopping auto-skip cascade.');
+      elements.pipelineStatus.textContent = 'Playback interrupted (retry song)';
+      state.isPlaying = false;
+      updatePlayPauseButton();
+      return;
+    }
+
+    console.warn(`[Deck] Playback error on track: ${track.title} (${track.id})`);
+    elements.pipelineStatus.textContent = 'Finding next playable song...';
 
     // If preloadedTrack on standbyDeck is verified playable, swap immediately!
-    if (preloadedTrack && isStandbyReady && !preloadedTrack.unplayable && !deadTracksSet.has(preloadedTrack.id)) {
+    if (preloadedTrack && isStandbyReady && preloadedTrack.id !== track.id) {
       const next = preloadedTrack;
       executeDeckSwapAndPlay(next);
       return;
     }
 
-    findAndPlayNextPlayableTrack();
+    setTimeout(() => {
+      findAndPlayNextPlayableTrack();
+    }, 350);
   }
 
   // Finds next verified playable candidate and transitions cleanly without skipping
   async function findAndPlayNextPlayableTrack() {
-    elements.pipelineStatus.textContent = '✨ Finding playable track...';
+    elements.pipelineStatus.textContent = 'Finding playable track...';
 
     // 1. Consume from smart queue
     while (smartAutoplayQueue.length > 0) {
       const cand = smartAutoplayQueue.shift();
-      if (!cand.unplayable && !deadTracksSet.has(cand.id)) {
+      if (cand && (!state.currentTrack || cand.id !== state.currentTrack.id)) {
         playTrackImmediately(cand);
         replenishSmartQueue();
         return;
@@ -1299,7 +1290,7 @@
     await replenishSmartQueue(true);
     while (smartAutoplayQueue.length > 0) {
       const cand = smartAutoplayQueue.shift();
-      if (!cand.unplayable && !deadTracksSet.has(cand.id)) {
+      if (cand && (!state.currentTrack || cand.id !== state.currentTrack.id)) {
         playTrackImmediately(cand);
         replenishSmartQueue();
         return;
@@ -1308,7 +1299,7 @@
 
     // 3. Fallback to Liked Songs
     for (const cand of state.likedSongs) {
-      if (!cand.unplayable && !deadTracksSet.has(cand.id)) {
+      if (cand && (!state.currentTrack || cand.id !== state.currentTrack.id)) {
         cand.reason = 'From your Liked Songs';
         playTrackImmediately(cand);
         replenishSmartQueue();
@@ -1318,7 +1309,7 @@
 
     // 4. Fallback to current list
     for (const cand of state.currentList) {
-      if (!cand.unplayable && !deadTracksSet.has(cand.id)) {
+      if (cand && (!state.currentTrack || cand.id !== state.currentTrack.id)) {
         playTrackImmediately(cand);
         replenishSmartQueue();
         return;
@@ -1383,11 +1374,7 @@
 
   function playTrackImmediately(track) {
     if (!track || !track.id) return;
-    if (deadTracksSet.has(track.id) || track.unplayable) {
-      console.warn(`Refusing to play unplayable track: ${track.title}`);
-      handleDeckPlaybackError(track);
-      return;
-    }
+    consecutiveErrorCount = 0;
 
     // If the requested track was already preloaded on standbyDeck, execute instant deck swap!
     if (preloadedTrack && preloadedTrack.id === track.id && isStandbyReady) {
@@ -1701,6 +1688,10 @@
 
       deck.addEventListener('error', (e) => {
         if (deck !== currentDeck) return;
+        if (deck.error && deck.error.code === 1) {
+          // MEDIA_ERR_ABORTED - normal during track transition or seek
+          return;
+        }
         handleDeckPlaybackError(state.currentTrack);
       });
     }

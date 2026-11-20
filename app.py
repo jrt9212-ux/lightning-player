@@ -79,7 +79,7 @@ IS_MAXIMIZED = False
 CLOSING = False
 CLOSING_LOCK = threading.Lock()
 
-APP_VERSION = "1.1.2"
+APP_VERSION = "1.1.3"
 
 UPDATE_STATE = {
     "current_version": APP_VERSION,
@@ -235,18 +235,11 @@ def execute_windows_swap_and_restart(new_exe_path):
     else:
         target_exe = os.path.abspath("Lightning Player.exe")
 
-    # Unblock downloaded file immediately to prevent SmartScreen Mark-of-the-Web issues (completely headless)
-    try:
-        subprocess.run(
-            ["powershell", "-NoProfile", "-WindowStyle", "Hidden", "-Command", f"Unblock-File -LiteralPath '{new_exe_path}'"],
-            capture_output=True, timeout=5,
-            creationflags=0x08000000
-        )
-    except Exception:
-        pass
+    ts = int(time.time())
+    bat_path = os.path.join(tempfile.gettempdir(), f"lp_swap_{ts}.bat")
+    vbs_path = os.path.join(tempfile.gettempdir(), f"lp_run_{ts}.vbs")
 
-    bat_path = os.path.join(tempfile.gettempdir(), f"lp_restart_{int(time.time())}.bat")
-    # Explicitly clear all PyInstaller bootloader environment variables so child doesn't check defunct parent PID
+    # Clean batch script: moves the new executable into place and launches it
     bat_content = f"""@echo off
 chcp 65001 >nul
 set _MEIPASS2=
@@ -264,25 +257,34 @@ if errorlevel 1 (
     timeout /t 1 /nobreak >nul
     goto loop
 )
-powershell -NoProfile -WindowStyle Hidden -Command "Unblock-File -LiteralPath '{target_exe}'; Start-Process -FilePath '{target_exe}'"
+start "" "{target_exe}"
 del "%~f0" >nul 2>&1
 """
+
+    # VBScript runner: WshShell.Run with window style 0 runs cmd.exe 100% INVISIBLE with zero window flash
+    vbs_content = (
+        'Set WshShell = CreateObject("WScript.Shell")\r\n'
+        f'WshShell.Run "cmd.exe /c """"{bat_path}""""", 0, False\r\n'
+        'Set fso = CreateObject("Scripting.FileSystemObject")\r\n'
+        'On Error Resume Next\r\n'
+        'fso.DeleteFile WScript.ScriptFullName\r\n'
+    )
     try:
         with open(bat_path, "w", encoding="utf-8") as f:
             f.write(bat_content)
+        with open(vbs_path, "w", encoding="utf-8") as f:
+            f.write(vbs_content)
 
-        # Remove PyInstaller variables from environment passed to detached cmd.exe
         clean_env = os.environ.copy()
         for k in list(clean_env.keys()):
             if k.startswith("_PYI") or k.startswith("_MEI") or "PYINSTALLER" in k:
                 clean_env.pop(k, None)
 
-        # 0x08000000 = CREATE_NO_WINDOW: runs the updater completely headless with zero console window
-        CREATE_NO_WINDOW = 0x08000000
-        subprocess.Popen(["cmd.exe", "/c", bat_path], env=clean_env, creationflags=CREATE_NO_WINDOW, close_fds=True)
-        log("Dispatched detached updater batch runner. Terminating host application.")
+        # wscript.exe is a GUI subsystem process: zero console window ever created
+        subprocess.Popen(["wscript.exe", vbs_path], env=clean_env, close_fds=True)
+        log("Dispatched silent VBS updater runner. Terminating host application.")
     except Exception as e:
-        log(f"Error launching restart batch: {e}")
+        log(f"Error launching restart runner: {e}")
 
     safe_close_window()
     os._exit(0)
@@ -393,8 +395,12 @@ def find_app_window():
 try:
     import yt_dlp
 except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "yt-dlp", "-q"])
-    import yt_dlp
+    if not getattr(sys, 'frozen', False):
+        try:
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "yt-dlp", "-q"])
+            import yt_dlp
+        except Exception:
+            pass
 
 def get_base_dir():
     if hasattr(sys, "_MEIPASS"):

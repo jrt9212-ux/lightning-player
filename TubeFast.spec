@@ -4,7 +4,13 @@
 a = Analysis(
     ['app.py'],
     pathex=[],
-    binaries=[],
+    binaries=[
+        (r'C:\Windows\System32\vcruntime140.dll', '.'),
+        (r'C:\Windows\System32\vcruntime140_1.dll', '.'),
+        (r'C:\Windows\System32\msvcp140.dll', '.'),
+        (r'C:\Windows\System32\msvcp140_1.dll', '.'),
+        (r'C:\Windows\System32\msvcp140_2.dll', '.'),
+    ],
     datas=[('client', 'client'), ('icon.ico', '.'), ('icon.png', '.'), ('categories_catalog.json', '.')],
     hiddenimports=['webview', 'clr_loader', 'pythonnet', 'cffi'],
     hookspath=[],

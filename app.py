@@ -79,7 +79,7 @@ IS_MAXIMIZED = False
 CLOSING = False
 CLOSING_LOCK = threading.Lock()
 
-APP_VERSION = "1.1.1"
+APP_VERSION = "1.1.2"
 
 UPDATE_STATE = {
     "current_version": APP_VERSION,
@@ -235,11 +235,12 @@ def execute_windows_swap_and_restart(new_exe_path):
     else:
         target_exe = os.path.abspath("Lightning Player.exe")
 
-    # Unblock downloaded file immediately to prevent SmartScreen Mark-of-the-Web issues
+    # Unblock downloaded file immediately to prevent SmartScreen Mark-of-the-Web issues (completely headless)
     try:
         subprocess.run(
-            ["powershell", "-NoProfile", "-Command", f"Unblock-File -LiteralPath '{new_exe_path}'"],
-            capture_output=True, timeout=5
+            ["powershell", "-NoProfile", "-WindowStyle", "Hidden", "-Command", f"Unblock-File -LiteralPath '{new_exe_path}'"],
+            capture_output=True, timeout=5,
+            creationflags=0x08000000
         )
     except Exception:
         pass
@@ -263,7 +264,7 @@ if errorlevel 1 (
     timeout /t 1 /nobreak >nul
     goto loop
 )
-powershell -NoProfile -Command "Unblock-File -LiteralPath '{target_exe}'; Start-Process -FilePath '{target_exe}'"
+powershell -NoProfile -WindowStyle Hidden -Command "Unblock-File -LiteralPath '{target_exe}'; Start-Process -FilePath '{target_exe}'"
 del "%~f0" >nul 2>&1
 """
     try:
@@ -276,8 +277,9 @@ del "%~f0" >nul 2>&1
             if k.startswith("_PYI") or k.startswith("_MEI") or "PYINSTALLER" in k:
                 clean_env.pop(k, None)
 
-        DETACHED_PROCESS = 0x00000008 | 0x00000200
-        subprocess.Popen(["cmd.exe", "/c", bat_path], env=clean_env, creationflags=DETACHED_PROCESS, close_fds=True)
+        # 0x08000000 = CREATE_NO_WINDOW: runs the updater completely headless with zero console window
+        CREATE_NO_WINDOW = 0x08000000
+        subprocess.Popen(["cmd.exe", "/c", bat_path], env=clean_env, creationflags=CREATE_NO_WINDOW, close_fds=True)
         log("Dispatched detached updater batch runner. Terminating host application.")
     except Exception as e:
         log(f"Error launching restart batch: {e}")
@@ -1941,7 +1943,7 @@ def launch_native_window(url):
                 "--window-size=1280,840"
             ]
             log(f"Launching desktop window via: {exe}")
-            subprocess.Popen(cmd)
+            subprocess.Popen(cmd, creationflags=0x08000000)
             return
 
     log("Opening default browser.")

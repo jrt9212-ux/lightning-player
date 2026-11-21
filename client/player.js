@@ -568,17 +568,6 @@
         </div>
       `;
 
-      // Proactive stream pre-warming on hover for instant playback on click
-      row.addEventListener('mouseenter', () => {
-        if (track.id && !deadTracksSet.has(track.id) && !track.unplayable) {
-          fetch(`/api/preload?id=${encodeURIComponent(track.id)}&title=${encodeURIComponent(track.title || '')}&artist=${encodeURIComponent(track.artist || '')}`).catch(() => {});
-          // If idle, buffer candidate into standby deck so user click is 100% instant!
-          if (!state.isPlaying && !state.currentTrack) {
-            preloadNextTrack(track);
-          }
-        }
-      });
-
       // Entire row is clickable to play immediately
       row.addEventListener('click', (e) => {
         if (e.target.closest('.track-action-btn')) return;
@@ -620,14 +609,6 @@
       container.appendChild(row);
     });
 
-    // Proactively pre-warm top 2 tracks in the newly rendered list for instant zero-delay playback
-    if (!targetContainer && tracks && tracks.length > 0) {
-      for (const t of tracks.slice(0, 2)) {
-        if (t && t.id) {
-          fetch(`/api/preload?id=${encodeURIComponent(t.id)}&title=${encodeURIComponent(t.title || '')}&artist=${encodeURIComponent(t.artist || '')}`).catch(() => {});
-        }
-      }
-    }
   }
 
   // Category Icon Resolver
@@ -891,12 +872,9 @@
       renderCategoryPills();
       renderDiscoverContent();
 
-      // Pre-buffer top tracks into standbyDeck for instant playback!
+      // Pre-buffer top track into standbyDeck for instant playback
       if (state.currentList.length > 0 && !state.isPlaying && !state.currentTrack) {
         preloadNextTrack(state.currentList[0]);
-        for (const t of state.currentList.slice(1, 3)) {
-          if (t && t.id) fetch(`/api/preload?id=${encodeURIComponent(t.id)}&title=${encodeURIComponent(t.title||'')}&artist=${encodeURIComponent(t.artist||'')}`).catch(()=>{});
-        }
       }
     } catch (e) {
       console.error('Failed to load discover categories:', e);

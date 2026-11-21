@@ -21,13 +21,45 @@ import time
 import urllib.parse
 import urllib.request
 import webbrowser
+import gc
 import ctypes
 import concurrent.futures
 from collections import deque
-from http.server import ThreadingHTTPServer
+
+# Configure Microsoft Edge WebView2 for minimal RAM footprint (<150MB total)
+if "WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS" not in os.environ:
+    os.environ["WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS"] = (
+        "--renderer-process-limit=1 "
+        "--js-flags=--max-old-space-size=96 "
+        "--disable-gpu-shader-disk-cache "
+        "--disable-background-networking "
+        "--disable-component-update "
+        "--disable-features=OptimizationHints,Translate,MediaRouter,CalculateNativeWinOcclusion "
+        "--disk-cache-size=16777216 "
+        "--media-cache-size=16777216 "
+        "--disable-extensions"
+    )
 
 kernel32 = ctypes.windll.kernel32 if os.name == 'nt' else None
 user32 = ctypes.windll.user32 if os.name == 'nt' else None
+
+def trim_process_memory():
+    """Trim unreferenced heap objects and discard unused physical pages back to Windows OS."""
+    try:
+        gc.collect()
+        if kernel32 and os.name == 'nt':
+            try:
+                ctypes.windll.psapi.EmptyWorkingSet(kernel32.GetCurrentProcess())
+            except Exception:
+                pass
+    except Exception:
+        pass
+
+def memory_watchdog_thread():
+    """Periodically trims process working set memory to maintain minimal RAM footprint (<100MB)."""
+    while not SHUTDOWN_REQUESTED:
+        time.sleep(30)
+        trim_process_memory()
 
 MUTEX_NAME = "Local\\LightningPlayer_SingleInstance_App_Mutex_8420"
 ERROR_ALREADY_EXISTS = 183
@@ -79,7 +111,7 @@ IS_MAXIMIZED = False
 CLOSING = False
 CLOSING_LOCK = threading.Lock()
 
-APP_VERSION = "1.1.6"
+APP_VERSION = "1.1.7"
 
 UPDATE_STATE = {
     "current_version": APP_VERSION,
@@ -1248,41 +1280,105 @@ def get_all_catalog_track_ids():
 FEATURED_TRACK_IDS = get_all_catalog_track_ids()
 load_dead_cache()
 
+YDL_LOCK = threading.Lock()
+_SEARCH_YDL = None
+_STREAM_YDL = None
+
+def get_search_ydl():
+    global _SEARCH_YDL
+    if _SEARCH_YDL is None:
+        opts = {
+            'format': 'bestaudio/best',
+            'quiet': True,
+            'no_warnings': True,
+            'extract_flat': True,
+            'skip_download': True,
+            'ignoreerrors': True,
+            'noplaylist': True,
+        }
+        _SEARCH_YDL = yt_dlp.YoutubeDL(opts)
+    return _SEARCH_YDL
+
+def get_stream_ydl():
+    global _STREAM_YDL
+    if _STREAM_YDL is None:
+        opts = {
+            'format': 'ba[ext=m4a]/140/ba/b[height<=480]/18/best',
+            'quiet': True,
+            'no_warnings': True,
+            'skip_download': True,
+            'ignoreerrors': True,
+            'noplaylist': True,
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['android', 'ios', 'web']
+                }
+            }
+        }
+        _STREAM_YDL = yt_dlp.YoutubeDL(opts)
+    return _STREAM_YDL
+
+PRELOAD_QUEUE = deque(maxlen=2)
+PRELOAD_LOCK = threading.Lock()
+PRELOAD_EVENT = threading.Event()
+
+def queue_preload(vid, title="", artist=""):
+    if not vid:
+        return
+    with PRELOAD_LOCK:
+        for item in PRELOAD_QUEUE:
+            if item[0] == vid:
+                return
+        PRELOAD_QUEUE.append((vid, title, artist))
+        PRELOAD_EVENT.set()
+
+def preload_worker_loop():
+    while not SHUTDOWN_REQUESTED:
+        PRELOAD_EVENT.wait(timeout=1.0)
+        while not SHUTDOWN_REQUESTED:
+            item = None
+            with PRELOAD_LOCK:
+                if not PRELOAD_QUEUE:
+                    PRELOAD_EVENT.clear()
+                    break
+                item = PRELOAD_QUEUE.popleft()
+            if item:
+                vid, title, artist = item
+                try:
+                    warmup_stream_cache(vid, title, artist)
+                except Exception:
+                    pass
+                time.sleep(0.05)
+
 def search_youtube(query, max_results=15):
-    """Search YouTube catalog via yt-dlp - includes all videos, live streams, leaks, remixes."""
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'quiet': True,
-        'no_warnings': True,
-        'extract_flat': True,
-        'skip_download': True,
-        'ignoreerrors': True,
-    }
+    """Search YouTube catalog via shared yt-dlp instance for minimal RAM footprint."""
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        with YDL_LOCK:
+            ydl = get_search_ydl()
             info = ydl.extract_info(f"ytsearch{max_results}:{query}", download=False)
-            tracks = []
-            for e in info.get("entries", []):
-                if not e or not e.get("id"):
-                    continue
-                dur = e.get("duration")
-                if dur:
-                    m, s = divmod(int(dur), 60)
-                    h, m = divmod(m, 60)
-                    dur_str = f"{h}:{m:02d}:{s:02d}" if h else f"{m}:{s:02d}"
-                else:
-                    dur_str = "Live"
-                vid_id = e.get("id")
-                tracks.append({
-                    "id": vid_id,
-                    "source": "youtube",
-                    "title": e.get("title", "Unknown Title"),
-                    "artist": e.get("uploader") or e.get("channel") or "Unknown Artist",
-                    "duration": dur_str,
-                    "thumbnail": e.get("thumbnail") or f"https://i.ytimg.com/vi/{vid_id}/hqdefault.jpg"
-                })
-            log(f"YouTube search for '{query}' found {len(tracks)} tracks")
-            return tracks if tracks else fallback_search(query)
+        tracks = []
+        for e in info.get("entries", []):
+            if not e or not e.get("id"):
+                continue
+            dur = e.get("duration")
+            if dur:
+                m, s = divmod(int(dur), 60)
+                h, m = divmod(m, 60)
+                dur_str = f"{h}:{m:02d}:{s:02d}" if h else f"{m}:{s:02d}"
+            else:
+                dur_str = "Live"
+            vid_id = e.get("id")
+            tracks.append({
+                "id": vid_id,
+                "source": "youtube",
+                "title": e.get("title", "Unknown Title"),
+                "artist": e.get("uploader") or e.get("channel") or "Unknown Artist",
+                "duration": dur_str,
+                "thumbnail": e.get("thumbnail") or f"https://i.ytimg.com/vi/{vid_id}/hqdefault.jpg"
+            })
+        log(f"YouTube search for '{query}' found {len(tracks)} tracks")
+        trim_process_memory()
+        return tracks if tracks else fallback_search(query)
     except Exception as e:
         log(f"YouTube search error for '{query}': {e}")
         return fallback_search(query)
@@ -1352,64 +1448,46 @@ def search_spotify(query, max_results=15):
         return []
 
 def resolve_spotify_to_yt(title, artist):
-    """Find the matching official audio stream on YouTube for a Spotify track."""
+    """Find the matching official audio stream on YouTube for a Spotify track using shared yt-dlp."""
     cache_key = f"{title.lower()} - {artist.lower()}".strip()
     if cache_key in RESOLVE_CACHE:
         return RESOLVE_CACHE[cache_key]
 
     query = f"{title} {artist} official audio"
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'quiet': True,
-        'no_warnings': True,
-        'extract_flat': True,
-        'skip_download': True,
-        'ignoreerrors': True,
-    }
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        with YDL_LOCK:
+            ydl = get_search_ydl()
             info = ydl.extract_info(f"ytsearch3:{query}", download=False)
-            entries = info.get("entries", [])
-            for e in entries:
-                if e and e.get("id"):
-                    vid_id = e.get("id")
-                    RESOLVE_CACHE[cache_key] = vid_id
-                    log(f"Resolved Spotify track '{title}' -> YouTube ID {vid_id}")
-                    return vid_id
+        entries = info.get("entries", [])
+        for e in entries:
+            if e and e.get("id"):
+                vid_id = e.get("id")
+                RESOLVE_CACHE[cache_key] = vid_id
+                log(f"Resolved Spotify track '{title}' -> YouTube ID {vid_id}")
+                return vid_id
     except Exception as e:
         log(f"Resolve error for '{title}': {e}")
     return None
 
 def get_audio_stream_url(video_id):
-    """Resolve direct playable audio stream URL using multi-client extraction."""
+    """Resolve direct playable audio stream URL using shared multi-client extraction instance."""
     now = time.time()
     if video_id in STREAM_CACHE:
         url, exp = STREAM_CACHE[video_id]
         if now < exp:
             return url
 
-    ydl_opts = {
-        'format': 'ba[ext=m4a]/140/ba/b[height<=480]/18/best',
-        'quiet': True,
-        'no_warnings': True,
-        'skip_download': True,
-        'ignoreerrors': True,
-        'noplaylist': True,
-        'extractor_args': {
-            'youtube': {
-                'player_client': ['android', 'ios', 'web']
-            }
-        }
-    }
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        with YDL_LOCK:
+            ydl = get_stream_ydl()
             info = ydl.extract_info(f"https://www.youtube.com/watch?v={video_id}", download=False)
-            stream_url = info.get("url") if info else None
-            if stream_url:
-                STREAM_CACHE[video_id] = (stream_url, now + (3600 * 5))
-                save_stream_cache()
-                return stream_url
-            return None
+        stream_url = info.get("url") if info else None
+        if stream_url:
+            STREAM_CACHE[video_id] = (stream_url, now + (3600 * 5))
+            save_stream_cache()
+            trim_process_memory()
+            return stream_url
+        return None
     except Exception as e:
         log(f"Stream resolution failure for {video_id}: {e}")
         return None
@@ -1434,36 +1512,18 @@ def warmup_stream_cache(vid, title="", artist=""):
         log(f"Stream pre-warm error for {vid}: {e}")
 
 def warmup_initial_catalog():
-    """Pre-warm top featured songs and user's liked songs so the very first track plays with 0ms delay."""
-    log("Pre-warming initial catalog for instant zero-delay playback...")
-    to_warm = []
-    seen = set()
+    """Pre-warm top 1 track so initial playback is instant without memory bloat."""
     try:
         lib = load_library_from_disk()
-        liked = lib.get("liked", [])
-        for item in liked[:4]:
-            cid = item.get("id")
-            if cid and cid not in DEAD_TRACK_CACHE and cid not in seen:
-                seen.add(cid)
-                to_warm.append((cid, item.get("title", ""), item.get("artist", "")))
         history = lib.get("history", [])
-        if history and history[0].get("id"):
-            hid = history[0]["id"]
-            if hid and hid not in DEAD_TRACK_CACHE and hid not in seen:
-                seen.add(hid)
-                to_warm.append((hid, history[0].get("title", ""), history[0].get("artist", "")))
-    except Exception:
-        pass
-
-    for t in FEATURED_TRACKS:
-        cid = t.get("id")
-        if cid and cid not in DEAD_TRACK_CACHE and cid not in seen:
-            seen.add(cid)
-            to_warm.append((cid, t.get("title", ""), t.get("artist", "")))
-
-    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
-        for vid, title, artist in to_warm:
-            executor.submit(warmup_stream_cache, vid, title, artist)
+        liked = lib.get("liked", [])
+        top = history[0] if history else (liked[0] if liked else (FEATURED_TRACKS[0] if FEATURED_TRACKS else None))
+        if top and top.get("id"):
+            warmup_stream_cache(top["id"], top.get("title", ""), top.get("artist", ""))
+    except Exception as e:
+        log(f"Initial warm error: {e}")
+    finally:
+        trim_process_memory()
 
 def fallback_search(query):
     q = query.lower()
@@ -1724,7 +1784,7 @@ class DualStreamHandler(http.server.SimpleHTTPRequestHandler):
             recs = get_smart_recommendations(seed_id, seed_title, seed_artist, source=src, exclude_ids=exclude_ids)
             if recs:
                 top_r = recs[0]
-                threading.Thread(target=warmup_stream_cache, args=(top_r["id"], top_r.get("title", ""), top_r.get("artist", "")), daemon=True).start()
+                queue_preload(top_r["id"], top_r.get("title", ""), top_r.get("artist", ""))
 
             body = json.dumps({"recommendations": recs}).encode("utf-8")
 
@@ -1741,7 +1801,7 @@ class DualStreamHandler(http.server.SimpleHTTPRequestHandler):
             title = params.get("title", [""])[0]
             artist = params.get("artist", [""])[0]
             if vid:
-                threading.Thread(target=warmup_stream_cache, args=(vid, title, artist), daemon=True).start()
+                queue_preload(vid, title, artist)
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.send_header("Access-Control-Allow-Origin", "*")
@@ -1874,21 +1934,46 @@ class DualStreamHandler(http.server.SimpleHTTPRequestHandler):
     def log_message(self, format, *args):
         pass
 
-class SilentThreadingHTTPServer(ThreadingHTTPServer):
+class ThreadPooledHTTPServer(http.server.HTTPServer):
     daemon_threads = True
+
+    def __init__(self, server_address, RequestHandlerClass):
+        super().__init__(server_address, RequestHandlerClass)
+        self.executor = concurrent.futures.ThreadPoolExecutor(
+            max_workers=6,
+            thread_name_prefix="HttpWorker"
+        )
+
+    def process_request(self, request, client_address):
+        self.executor.submit(self.process_request_thread, request, client_address)
+
+    def process_request_thread(self, request, client_address):
+        try:
+            self.finish_request(request, client_address)
+        except Exception:
+            self.handle_error(request, client_address)
+        finally:
+            self.shutdown_request(request)
 
     def handle_error(self, request, client_address):
         pass
 
+    def server_close(self):
+        super().server_close()
+        try:
+            self.executor.shutdown(wait=False, cancel_futures=True)
+        except Exception:
+            pass
+
 def get_server(preferred_ports=(8420, 8421, 8422, 3844, 3000)):
     for p in preferred_ports:
         try:
-            srv = SilentThreadingHTTPServer(("127.0.0.1", p), DualStreamHandler)
+            srv = ThreadPooledHTTPServer(("127.0.0.1", p), DualStreamHandler)
             log(f"Successfully bound server on port {p}")
             return srv, p
         except OSError:
             continue
-    srv = SilentThreadingHTTPServer(("127.0.0.1", 0), DualStreamHandler)
+    srv = ThreadPooledHTTPServer(("127.0.0.1", 0), DualStreamHandler)
     p = srv.server_address[1]
     log(f"Bound server on dynamic port {p}")
     return srv, p
@@ -1946,6 +2031,8 @@ if __name__ == "__main__":
     server, port = get_server()
     t = threading.Thread(target=server.serve_forever, daemon=True)
     t.start()
+    threading.Thread(target=preload_worker_loop, daemon=True).start()
+    threading.Thread(target=memory_watchdog_thread, daemon=True).start()
     threading.Thread(target=warmup_initial_catalog, daemon=True).start()
     threading.Thread(target=auto_update_watchdog_thread, daemon=True).start()
 

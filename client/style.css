@@ -824,8 +824,8 @@ body::after {
   align-items: center;
   gap: 10px;
   overflow-x: auto;
-  padding: 8px 2px 14px 2px;
-  margin-top: 6px;
+  padding: 10px 4px 12px 4px;
+  margin-top: 4px;
   scrollbar-width: thin;
   scrollbar-color: rgba(56, 189, 248, 0.35) transparent;
 }
@@ -842,11 +842,17 @@ body::after {
 .category-pill {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 8px 18px;
+  padding: 0 16px;
+  height: 38px;
+  box-sizing: border-box;
+  flex-shrink: 0;
   border-radius: var(--radius-full);
+  font-family: inherit;
   font-size: 0.86rem;
   font-weight: 600;
+  line-height: 1;
   color: var(--text-muted);
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -854,6 +860,7 @@ body::after {
   white-space: nowrap;
   transition: all var(--transition-fast);
   user-select: none;
+  outline: none;
 }
 
 .category-pill:hover {
@@ -866,8 +873,8 @@ body::after {
 .category-pill.active {
   color: #fff;
   background: linear-gradient(135deg, rgba(14, 165, 233, 0.3), rgba(37, 99, 235, 0.25));
-  border-color: #38bdf8;
-  box-shadow: 0 0 16px rgba(14, 165, 233, 0.35);
+  border: 1.5px solid #38bdf8;
+  box-shadow: 0 0 14px rgba(14, 165, 233, 0.3);
 }
 
 .category-pill .pill-badge {
@@ -876,6 +883,7 @@ body::after {
   border-radius: var(--radius-full);
   background: rgba(255, 255, 255, 0.08);
   color: var(--text-muted);
+  line-height: 1.2;
 }
 
 .category-pill.active .pill-badge {

@@ -24,7 +24,8 @@
     isScrubbing: false,
     modalTargetTrack: null,
     activeCategory: 'all',
-    discoverData: null
+    discoverData: null,
+    playbackContext: 'discover' // 'discover' | 'playlist' | 'liked' | 'queue'
   };
 
   const STORAGE_KEYS = {
@@ -571,6 +572,15 @@
       // Entire row is clickable to play immediately
       row.addEventListener('click', (e) => {
         if (e.target.closest('.track-action-btn')) return;
+        if (isLikedView) {
+          state.playbackContext = 'liked';
+        } else if (playlistId) {
+          state.playbackContext = 'playlist';
+        } else if (isQueueView) {
+          state.playbackContext = 'queue';
+        } else {
+          state.playbackContext = 'discover';
+        }
         playTrackImmediately(track);
       });
 
@@ -1206,6 +1216,10 @@
       // Immediately start preloading the following song on the newly available standbyDeck!
       ensureNextTrackPreloaded();
     }).catch(err => {
+      // AbortError is triggered when another track is selected or user skips — do NOT cascade as error!
+      if (err && (err.name === 'AbortError' || err.code === 20)) {
+        return;
+      }
       console.warn('Instant deck play error:', err);
       handleDeckPlaybackError(track);
     });
@@ -1220,7 +1234,7 @@
   function handleDeckPlaybackError(track) {
     if (!track) return;
     const now = Date.now();
-    if (now - lastErrorTimestamp < 2500) {
+    if (now - lastErrorTimestamp < 3000) {
       consecutiveErrorCount++;
     } else {
       consecutiveErrorCount = 1;
@@ -1229,7 +1243,7 @@
 
     if (consecutiveErrorCount > 2) {
       console.warn('[Deck] Rapid playback errors detected. Stopping auto-skip cascade.');
-      elements.pipelineStatus.textContent = 'Playback interrupted (retry song)';
+      elements.pipelineStatus.textContent = 'Track unavailable (retry song)';
       state.isPlaying = false;
       updatePlayPauseButton();
       return;
@@ -1247,7 +1261,7 @@
 
     setTimeout(() => {
       findAndPlayNextPlayableTrack();
-    }, 350);
+    }, 400);
   }
 
   // Finds next verified playable candidate and transitions cleanly without skipping
@@ -1275,19 +1289,23 @@
       }
     }
 
-    // 3. Fallback to Liked Songs
-    for (const cand of state.likedSongs) {
-      if (cand && (!state.currentTrack || cand.id !== state.currentTrack.id)) {
-        cand.reason = 'From your Liked Songs';
-        playTrackImmediately(cand);
-        replenishSmartQueue();
-        return;
+    // 3. Fallback to active discover / category tracks (NEVER hijack into Liked Songs!)
+    if (state.discoverData && state.discoverData.categories) {
+      const activeCat = state.discoverData.categories[state.activeCategory]?.tracks || [];
+      const pool = activeCat.length > 0 ? activeCat : Object.values(state.discoverData.categories).flatMap(c => c.tracks || []);
+      for (const cand of pool) {
+        if (!cand.unplayable && !deadTracksSet.has(cand.id) && (!state.currentTrack || cand.id !== state.currentTrack.id)) {
+          cand.reason = 'Discovery Radio';
+          playTrackImmediately(cand);
+          replenishSmartQueue();
+          return;
+        }
       }
     }
 
     // 4. Fallback to current list
     for (const cand of state.currentList) {
-      if (cand && (!state.currentTrack || cand.id !== state.currentTrack.id)) {
+      if (cand && (!state.currentTrack || cand.id !== state.currentTrack.id) && !deadTracksSet.has(cand.id)) {
         playTrackImmediately(cand);
         replenishSmartQueue();
         return;
@@ -1329,19 +1347,23 @@
       }
     }
 
-    // 3. Fallback: Liked Songs or current list
-    for (const cand of state.likedSongs) {
-      if (!cand.unplayable && !deadTracksSet.has(cand.id)) {
-        cand.reason = 'From your Liked Songs';
-        playTrackImmediately(cand);
-        replenishSmartQueue();
-        return;
+    // 3. Fallback: Category or current list tracks (NEVER hijack into Liked Songs!)
+    if (state.discoverData && state.discoverData.categories) {
+      const activeCat = state.discoverData.categories[state.activeCategory]?.tracks || [];
+      const pool = activeCat.length > 0 ? activeCat : Object.values(state.discoverData.categories).flatMap(c => c.tracks || []);
+      for (const cand of pool) {
+        if (!cand.unplayable && !deadTracksSet.has(cand.id) && (!state.currentTrack || cand.id !== state.currentTrack.id)) {
+          cand.reason = 'Category Radio';
+          playTrackImmediately(cand);
+          replenishSmartQueue();
+          return;
+        }
       }
     }
 
     if (state.currentList.length > 0) {
       for (const cand of state.currentList) {
-        if (!cand.unplayable && !deadTracksSet.has(cand.id)) {
+        if (!cand.unplayable && !deadTracksSet.has(cand.id) && (!state.currentTrack || cand.id !== state.currentTrack.id)) {
           playTrackImmediately(cand);
           replenishSmartQueue();
           return;
@@ -1406,6 +1428,10 @@
       // Preload next track as soon as playback commences!
       ensureNextTrackPreloaded();
     }).catch(err => {
+      // AbortError is triggered when another track is selected or user skips — do NOT cascade as error!
+      if (err && (err.name === 'AbortError' || err.code === 20)) {
+        return;
+      }
       console.warn('Playback start error:', err);
       handleDeckPlaybackError(track);
     });
@@ -1500,10 +1526,10 @@
       }
     }
 
-    // 3. If user is playing inside a custom playlist or Liked Songs, advance to next verified playable track
-    if (state.activeTab !== 'discover' && state.activeTab !== 'queue' && state.currentList.length > 0) {
+    // 3. If user is explicitly playing inside a custom playlist or Liked Songs
+    if ((state.playbackContext === 'playlist' || state.playbackContext === 'liked') && state.currentList.length > 0) {
       let curIdx = state.currentList.findIndex(t => t.id === state.currentTrack?.id);
-      if (curIdx !== -1) {
+      if (curIdx !== -1 && curIdx + 1 < state.currentList.length) {
         for (let i = curIdx + 1; i < state.currentList.length; i++) {
           const cand = state.currentList[i];
           if (!cand.unplayable && !deadTracksSet.has(cand.id)) {
@@ -1521,7 +1547,8 @@
           }
         }
       }
-      // When playlist reaches the end or has no remaining playable tracks, smoothly transition into Smart Radio autoplay!
+      // When playlist reaches the end, gracefully exit playlist context and flow into Smart Radio autoplay!
+      state.playbackContext = 'discover';
     }
 
     // 4. Intelligent Autoplay: play similar/recommended song tailored to taste profile
@@ -1690,12 +1717,12 @@
         return;
       }
 
-      // 2. Buffer freeze / stall detection: Playing state but position stuck for > 8s
-      if (!currentDeck.paused && Math.abs(cur - lastAudioPosition) < 0.05) {
+      // 2. Buffer freeze / stall detection: ONLY if track was actively progressing (cur > 0.5) and stalled for > 12s
+      if (!currentDeck.paused && cur > 0.5 && Math.abs(cur - lastAudioPosition) < 0.05) {
         stallCounter++;
-        if (stallCounter === 4) {
+        if (stallCounter === 5) {
           try { currentDeck.currentTime += 0.2; currentDeck.play().catch(() => {}); } catch (_) {}
-        } else if (stallCounter >= 8) {
+        } else if (stallCounter >= 12) {
           stallCounter = 0;
           playNextTrack();
         }
@@ -1838,8 +1865,19 @@
 
     // Player Controls
     elements.playPauseBtn.addEventListener('click', togglePlayPause);
-    elements.nextBtn.addEventListener('click', playNextTrack);
-    elements.prevBtn.addEventListener('click', playPrevTrack);
+    let isSkippingTrack = false;
+    elements.nextBtn.addEventListener('click', () => {
+      if (isSkippingTrack) return;
+      isSkippingTrack = true;
+      setTimeout(() => { isSkippingTrack = false; }, 350);
+      playNextTrack();
+    });
+    elements.prevBtn.addEventListener('click', () => {
+      if (isSkippingTrack) return;
+      isSkippingTrack = true;
+      setTimeout(() => { isSkippingTrack = false; }, 350);
+      playPrevTrack();
+    });
 
     elements.shuffleBtn.addEventListener('click', () => {
       state.isShuffling = !state.isShuffling;
@@ -1992,15 +2030,17 @@
     let list = [];
     if (state.activeTab === 'liked') {
       list = state.likedSongs;
+      state.playbackContext = 'liked';
     } else if (state.activeTab && state.activeTab.startsWith('pl_')) {
       const pl = state.playlists.find(p => p.id === state.activeTab);
       if (pl) list = pl.tracks;
+      state.playbackContext = 'playlist';
     }
 
     if (!list || list.length === 0) return;
 
-    // Load full list into queue and play track 0
-    state.queue = [...list];
+    // Load subsequent tracks into manual queue and play track 0
+    state.queue = list.slice(1).map(t => ({ ...t }));
     updateQueueUI();
     playTrackImmediately(list[0]);
   }

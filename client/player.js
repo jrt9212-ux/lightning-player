@@ -1220,6 +1220,13 @@
       if (err && (err.name === 'AbortError' || err.code === 20)) {
         return;
       }
+      if (err && err.name === 'NotAllowedError') {
+        console.warn('Playback paused pending user gesture.');
+        state.isPlaying = false;
+        updatePlayPauseButton();
+        elements.pipelineStatus.textContent = 'Click Play to start listening';
+        return;
+      }
       console.warn('Instant deck play error:', err);
       handleDeckPlaybackError(track);
     });
@@ -1430,6 +1437,13 @@
     }).catch(err => {
       // AbortError is triggered when another track is selected or user skips — do NOT cascade as error!
       if (err && (err.name === 'AbortError' || err.code === 20)) {
+        return;
+      }
+      if (err && err.name === 'NotAllowedError') {
+        console.warn('Playback paused pending user gesture.');
+        state.isPlaying = false;
+        updatePlayPauseButton();
+        elements.pipelineStatus.textContent = 'Click Play to start listening';
         return;
       }
       console.warn('Playback start error:', err);

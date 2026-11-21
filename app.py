@@ -29,6 +29,7 @@ from collections import deque
 # Configure Microsoft Edge WebView2 for minimal RAM footprint (<150MB total)
 if "WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS" not in os.environ:
     os.environ["WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS"] = (
+        "--autoplay-policy=no-user-gesture-required "
         "--renderer-process-limit=1 "
         "--js-flags=--max-old-space-size=96 "
         "--disable-gpu-shader-disk-cache "
@@ -893,16 +894,20 @@ def get_smart_recommendations(seed_id, seed_title, seed_artist, source="youtube"
         f_sp = [executor.submit(run_sp, q) for q in sp_queries[:4]]
         f_yt = [executor.submit(run_yt, q) for q in yt_queries[:4]]
 
-        for f in concurrent.futures.as_completed(f_sp, timeout=4.0):
-            try:
-                raw_sp.extend(f.result())
-            except Exception:
-                pass
-        for f in concurrent.futures.as_completed(f_yt, timeout=4.0):
-            try:
-                raw_yt.extend(f.result())
-            except Exception:
-                pass
+        all_futures = f_sp + f_yt
+        done, _ = concurrent.futures.wait(all_futures, timeout=3.5)
+        for f in f_sp:
+            if f in done:
+                try:
+                    raw_sp.extend(f.result())
+                except Exception:
+                    pass
+        for f in f_yt:
+            if f in done:
+                try:
+                    raw_yt.extend(f.result())
+                except Exception:
+                    pass
 
     seen_ids = set(exclude_ids or [])
     if seed_id:
@@ -1732,6 +1737,14 @@ class DualStreamHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=CLIENT_DIR, **kwargs)
 
+    def end_headers(self):
+        has_cache = any(b"Cache-Control" in h for h in getattr(self, "_headers_buffer", []))
+        if not has_cache:
+            self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+            self.send_header("Pragma", "no-cache")
+            self.send_header("Expires", "0")
+        super().end_headers()
+
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
         params = urllib.parse.parse_qs(parsed.query)
@@ -1827,44 +1840,64 @@ class DualStreamHandler(http.server.SimpleHTTPRequestHandler):
         # 2a. Discover endpoint with 5 categories (25 songs each) + dynamic personalized "For You"
         if parsed.path == "/api/discover":
             src = params.get("source", ["youtube"])[0].lower()
-            catalog = load_categories_catalog()
-            platform_cats = catalog.get(src, {})
+            try:
+                catalog = load_categories_catalog()
+                platform_cats = catalog.get(src, {})
 
-            lib = load_library_from_disk()
-            taste = lib.get("taste_profile", {}).get("artists", {})
-            history = lib.get("history", [])
+                lib = load_library_from_disk()
+                taste = lib.get("taste_profile", {}).get("artists", {})
+                history = lib.get("history", [])
 
-            top_artists = sorted(taste.keys(), key=lambda a: taste[a], reverse=True)
-            seed_artist = top_artists[0] if top_artists else ""
-            seed_title = history[0].get("title", "") if history else ""
+                top_artists = sorted(taste.keys(), key=lambda a: taste[a], reverse=True)
+                seed_artist = top_artists[0] if top_artists else ""
+                seed_title = history[0].get("title", "") if history else ""
 
-            if not seed_artist:
-                seed_artist = "The Weeknd" if src == "spotify" else "Travis Scott"
+                if not seed_artist:
+                    seed_artist = "The Weeknd" if src == "spotify" else "Travis Scott"
 
-            for_you_tracks = get_smart_recommendations(
-                seed_id="",
-                seed_title=seed_title,
-                seed_artist=seed_artist,
-                source=src,
-                exclude_ids=[]
-            )
+                for_you_tracks = get_smart_recommendations(
+                    seed_id="",
+                    seed_title=seed_title,
+                    seed_artist=seed_artist,
+                    source=src,
+                    exclude_ids=[]
+                )
 
-            reason_str = f"Based on your listening to {seed_artist}" if top_artists else f"Curated trending picks for you"
-            body = json.dumps({
-                "source": src,
-                "for_you": for_you_tracks[:15],
-                "for_you_reason": reason_str,
-                "categories": platform_cats,
-                "dead_tracks": list(DEAD_TRACK_CACHE)
-            }, ensure_ascii=False).encode("utf-8")
+                reason_str = f"Based on your listening to {seed_artist}" if top_artists else f"Curated trending picks for you"
+                body = json.dumps({
+                    "source": src,
+                    "for_you": for_you_tracks[:15],
+                    "for_you_reason": reason_str,
+                    "categories": platform_cats,
+                    "dead_tracks": list(DEAD_TRACK_CACHE)
+                }, ensure_ascii=False).encode("utf-8")
 
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Access-Control-Allow-Origin", "*")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
-            return
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.send_header("Cache-Control", "no-cache")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
+            except Exception as de:
+                log(f"Discover endpoint exception: {de}")
+                catalog = load_categories_catalog()
+                fallback_body = json.dumps({
+                    "source": src,
+                    "for_you": [],
+                    "for_you_reason": "Curated picks for you",
+                    "categories": catalog.get(src, {}),
+                    "dead_tracks": list(DEAD_TRACK_CACHE)
+                }, ensure_ascii=False).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.send_header("Cache-Control", "no-cache")
+                self.send_header("Content-Length", str(len(fallback_body)))
+                self.end_headers()
+                self.wfile.write(fallback_body)
+                return
 
         # 2. Popular / Initial tracks
         if parsed.path == "/api/popular":
@@ -2152,7 +2185,8 @@ class ThreadPooledHTTPServer(http.server.HTTPServer):
             self.shutdown_request(request)
 
     def handle_error(self, request, client_address):
-        pass
+        import traceback
+        log(f"HTTP Server Exception:\n{traceback.format_exc()}")
 
     def server_close(self):
         super().server_close()
@@ -2211,6 +2245,7 @@ def launch_native_window(url):
                 f"--user-data-dir={profile_dir}",
                 "--no-first-run",
                 "--no-default-browser-check",
+                "--autoplay-policy=no-user-gesture-required",
                 "--enable-features=WindowControlsOverlay",
                 "--window-size=1280,840"
             ]

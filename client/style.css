@@ -824,8 +824,11 @@ body::after {
   align-items: center;
   gap: 10px;
   overflow-x: auto;
-  padding: 10px 4px 12px 4px;
+  overflow-y: hidden;
+  padding: 12px 6px 14px 6px;
   margin-top: 4px;
+  min-height: 64px;
+  box-sizing: border-box;
   scrollbar-width: thin;
   scrollbar-color: rgba(56, 189, 248, 0.35) transparent;
 }
@@ -844,18 +847,18 @@ body::after {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 0 16px;
+  padding: 0 18px;
   height: 38px;
   box-sizing: border-box;
   flex-shrink: 0;
-  border-radius: var(--radius-full);
+  border-radius: 9999px;
   font-family: inherit;
   font-size: 0.86rem;
   font-weight: 600;
-  line-height: 1;
+  line-height: 38px;
   color: var(--text-muted);
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
   cursor: pointer;
   white-space: nowrap;
   transition: all var(--transition-fast);

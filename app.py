@@ -111,7 +111,7 @@ IS_MAXIMIZED = False
 CLOSING = False
 CLOSING_LOCK = threading.Lock()
 
-APP_VERSION = "1.1.7"
+APP_VERSION = "1.1.8"
 
 UPDATE_STATE = {
     "current_version": APP_VERSION,
@@ -660,6 +660,141 @@ def record_track_played(track_info):
 
 RECENT_RECOMMENDED_IDS = deque(maxlen=80)
 
+# Genre taxonomy and clustering for intelligent, genre-locked recommendations
+GENRE_FAMILIES = [
+    ("latin", ["urbano latino", "latin urban", "latin", "latino", "reggaeton", "música mexicana", "regional mexicano", "musica mexicana", "bachata", "salsa"]),
+    ("rap", ["hip-hop/rap", "hip-hop", "hip hop", "gangsta rap", "hardcore rap", "trap", "drill", "rap"]),
+    ("pop", ["dance-pop", "teen pop", "synth-pop", "indie pop", "electropop", "pop"]),
+    ("rnb", ["r&b/soul", "r&b", "soul", "neo-soul"]),
+    ("rock", ["alternative", "alt-rock", "metal", "hard rock", "punk", "indie rock", "rock"]),
+    ("edm", ["dance", "electronic", "edm", "house", "techno"]),
+    ("lofi", ["lo-fi", "chillhop", "ambient", "chill"]),
+    ("country", ["country"])
+]
+
+CATEGORY_TO_FAMILY = {
+    "hiphop_central": "rap",
+    "rap_trap": "rap",
+    "drill_underground": "rap",
+    "viral_remix": "pop",
+    "pop_hits": "pop",
+    "rnb_soul": "rnb",
+    "latin_fire": "latin",
+    "rock_alt": "rock",
+    "edm_dance": "edm",
+    "chill_lofi": "lofi"
+}
+
+ARTIST_TO_FAMILY = {}
+FAMILY_TO_ARTISTS = {k: set() for k in ["rap", "pop", "rnb", "latin", "rock", "edm", "lofi", "country"]}
+FAMILY_TO_TRACKS = {k: {"spotify": [], "youtube": []} for k in ["rap", "pop", "rnb", "latin", "rock", "edm", "lofi", "country"]}
+GENRE_CATALOG_INITIALIZED = False
+
+def init_genre_catalog():
+    global GENRE_CATALOG_INITIALIZED
+    if GENRE_CATALOG_INITIALIZED:
+        return
+    cat = load_categories_catalog()
+    cat_order = [
+        ("spotify", "hiphop_central"), ("youtube", "rap_trap"), ("youtube", "drill_underground"),
+        ("spotify", "latin_fire"), ("spotify", "pop_hits"), ("spotify", "rnb_soul"),
+        ("spotify", "edm_dance"), ("youtube", "rock_alt"), ("youtube", "chill_lofi"), ("youtube", "viral_remix")
+    ]
+    for src, cname in cat_order:
+        fam = CATEGORY_TO_FAMILY.get(cname)
+        if not fam:
+            continue
+        cdata = cat.get(src, {}).get(cname, {})
+        tracks = cdata.get("tracks", [])
+        for t in tracks:
+            t_copy = dict(t)
+            t_copy["source"] = src
+            FAMILY_TO_TRACKS[fam][src].append(t_copy)
+            art = t.get("artist", "")
+            if art:
+                clean_art = re.split(r'\s*(?:feat\.?|ft\.?|&|,|x)\s+', art, flags=re.IGNORECASE)[0].strip()
+                if clean_art and len(clean_art) > 1:
+                    low = clean_art.lower()
+                    if low not in ARTIST_TO_FAMILY:
+                        ARTIST_TO_FAMILY[low] = fam
+                        FAMILY_TO_ARTISTS[fam].add(clean_art)
+                if art.lower() not in ARTIST_TO_FAMILY:
+                    ARTIST_TO_FAMILY[art.lower()] = fam
+                    FAMILY_TO_ARTISTS[fam].add(art)
+    GENRE_CATALOG_INITIALIZED = True
+    log(f"Genre catalog initialized: {len(ARTIST_TO_FAMILY)} artists indexed across {len(FAMILY_TO_ARTISTS)} genre families.")
+
+def detect_genre_family(seed_title, seed_artist):
+    init_genre_catalog()
+    raw_art = (seed_artist or "").strip()
+    if not raw_art:
+        return "rap"
+
+    art_low = raw_art.lower()
+    if art_low in ARTIST_TO_FAMILY:
+        return ARTIST_TO_FAMILY[art_low]
+
+    primary_art = re.split(r'\s*(?:feat\.?|ft\.?|&|,|x)\s+', raw_art, flags=re.IGNORECASE)[0].strip()
+    if primary_art:
+        p_low = primary_art.lower()
+        if p_low in ARTIST_TO_FAMILY:
+            return ARTIST_TO_FAMILY[p_low]
+
+    for known_art, fam in ARTIST_TO_FAMILY.items():
+        if len(known_art) >= 4 and (known_art in art_low or art_low in known_art):
+            ARTIST_TO_FAMILY[art_low] = fam
+            return fam
+
+    # Real-time Apple iTunes Search API resolution
+    try:
+        query_art = primary_art or raw_art
+        url = f"https://itunes.apple.com/search?term={urllib.parse.quote(query_art)}&entity=musicArtist&limit=1"
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=2.5) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            results = data.get("results", [])
+            if results:
+                raw_genre = (results[0].get("primaryGenreName") or "").lower()
+                for fam, tags in GENRE_FAMILIES:
+                    for tag in tags:
+                        if tag in raw_genre:
+                            ARTIST_TO_FAMILY[art_low] = fam
+                            FAMILY_TO_ARTISTS[fam].add(raw_art)
+                            log(f"Detected genre '{fam}' (iTunes: '{raw_genre}') for artist '{raw_art}'")
+                            return fam
+    except Exception as e:
+        log(f"iTunes genre lookup failed for '{raw_art}': {e}")
+
+    # Fallback keyword detection
+    t_low = (seed_title or "").lower()
+    rap_keywords = ("drill", "freestyle", "rap", "trap", "hip hop", "hiphop", "prod by", "beat", "instrumental", "type beat")
+    latin_keywords = ("reggaeton", "bachata", "corridos", "salsa", "remix latino", "musica mexicana")
+    pop_keywords = ("pop", "acoustic", "radio edit")
+    rock_keywords = ("rock", "guitar", "metal", "punk", "hardcore")
+
+    for kw in latin_keywords:
+        if kw in t_low or kw in art_low:
+            ARTIST_TO_FAMILY[art_low] = "latin"
+            return "latin"
+
+    for kw in rap_keywords:
+        if kw in t_low or kw in art_low:
+            ARTIST_TO_FAMILY[art_low] = "rap"
+            return "rap"
+
+    for kw in rock_keywords:
+        if kw in t_low or kw in art_low:
+            ARTIST_TO_FAMILY[art_low] = "rock"
+            return "rock"
+
+    for kw in pop_keywords:
+        if kw in t_low or kw in art_low:
+            ARTIST_TO_FAMILY[art_low] = "pop"
+            return "pop"
+
+    ARTIST_TO_FAMILY[art_low] = "rap"
+    return "rap"
+
 def get_smart_recommendations(seed_id, seed_title, seed_artist, source="youtube", exclude_ids=None):
     if exclude_ids is None:
         exclude_ids = set()
@@ -668,6 +803,7 @@ def get_smart_recommendations(seed_id, seed_title, seed_artist, source="youtube"
     if seed_id:
         exclude_ids.add(seed_id)
 
+    init_genre_catalog()
     lib = load_library_from_disk()
     taste = lib.get("taste_profile", {}).get("artists", {})
     history = lib.get("history", [])
@@ -680,9 +816,26 @@ def get_smart_recommendations(seed_id, seed_title, seed_artist, source="youtube"
         exclude_ids.add(rid)
 
     clean_title, primary_seed, secondary_seeds = parse_track_metadata(seed_title, seed_artist)
+    seed_family = detect_genre_family(seed_title, seed_artist)
+    log(f"Smart recommendations for '{seed_title}' by '{seed_artist}' -> Detected Genre Family: '{seed_family}'")
+
+    # Sample sibling artists strictly from the SAME genre family
+    fam_artists = [
+        a for a in FAMILY_TO_ARTISTS.get(seed_family, [])
+        if a.lower() != primary_seed.lower() and a.lower() not in [s.lower() for s in secondary_seeds]
+    ]
+    sampled_similars = []
+    if fam_artists:
+        sample_n = min(3, len(fam_artists))
+        sampled_similars = random.sample(fam_artists, sample_n)
 
     top_artists = sorted(taste.keys(), key=lambda a: taste[a], reverse=True)
-    fav_candidates = [a for a in top_artists if a.lower() != primary_seed.lower() and a.lower() not in [s.lower() for s in secondary_seeds]]
+    fav_candidates = [
+        a for a in top_artists
+        if a.lower() != primary_seed.lower()
+        and a.lower() not in [s.lower() for s in secondary_seeds]
+        and ARTIST_TO_FAMILY.get(a.lower()) == seed_family  # ONLY match same genre
+    ]
 
     sampled_taste = []
     if fav_candidates:
@@ -706,8 +859,12 @@ def get_smart_recommendations(seed_id, seed_title, seed_artist, source="youtube"
         yt_queries.append(f"{primary_seed} official audio")
         yt_queries.append(f"{primary_seed} songs")
     else:
-        sp_queries.append("top hits")
-        yt_queries.append("popular music songs")
+        sp_queries.append(f"{seed_family} hits")
+        yt_queries.append(f"{seed_family} music songs")
+
+    for sim in sampled_similars:
+        sp_queries.append(sim)
+        yt_queries.append(f"{sim} official audio")
 
     if secondary_seeds:
         sp_queries.append(secondary_seeds[0])
@@ -733,8 +890,8 @@ def get_smart_recommendations(seed_id, seed_title, seed_artist, source="youtube"
             return []
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
-        f_sp = [executor.submit(run_sp, q) for q in sp_queries[:3]]
-        f_yt = [executor.submit(run_yt, q) for q in yt_queries[:3]]
+        f_sp = [executor.submit(run_sp, q) for q in sp_queries[:4]]
+        f_yt = [executor.submit(run_yt, q) for q in yt_queries[:4]]
 
         for f in concurrent.futures.as_completed(f_sp, timeout=4.0):
             try:
@@ -782,6 +939,28 @@ def get_smart_recommendations(seed_id, seed_title, seed_artist, source="youtube"
                 return False
         return True
 
+    def is_candidate_genre_compatible(c):
+        c_art = (c.get("artist") or "").lower()
+        if not c_art:
+            return True
+        c_primary = re.split(r'\s*(?:feat\.?|ft\.?|&|,|x)\s+', c_art, flags=re.IGNORECASE)[0].strip()
+        fam = ARTIST_TO_FAMILY.get(c_art) or ARTIST_TO_FAMILY.get(c_primary)
+        if fam and fam != seed_family:
+            return False
+
+        if seed_family == "rap":
+            banned_latin = ("bad bunny", "feid", "karol g", "ozuna", "peso pluma", "rauw alejandro", "anuel aa", "j balvin", "maluma", "rosalía", "daddy yankee", "bomba estéreo")
+            banned_pop = ("taylor swift", "harry styles", "dua lipa", "olivia rodrigo", "ed sheeran", "katy perry", "bts", "billie eilish", "sabrina carpenter", "chappell roan")
+            for b in banned_latin + banned_pop:
+                if b in c_art:
+                    return False
+        elif seed_family == "latin":
+            banned_rap = ("lil baby", "king von", "tee grizzley", "durk", "polo g", "pop smoke")
+            for b in banned_rap:
+                if b in c_art:
+                    return False
+        return True
+
     def process_bucket(raw_list):
         cleaned = []
         for c in raw_list:
@@ -790,6 +969,8 @@ def get_smart_recommendations(seed_id, seed_title, seed_artist, source="youtube"
             if not cid or cid in DEAD_TRACK_CACHE or not is_valid_song_duration(cdur):
                 continue
             if cid in seen_ids:
+                continue
+            if not is_candidate_genre_compatible(c):
                 continue
 
             c_keys = get_song_title_keys(c.get("title", ""), c.get("artist", ""))
@@ -804,7 +985,22 @@ def get_smart_recommendations(seed_id, seed_title, seed_artist, source="youtube"
     sp_pool = process_bucket(raw_sp)
     yt_pool = process_bucket(raw_yt)
 
-    # Backfill if either pool is small to ensure robust 50/50 balance
+    # Category-locked backfill from local catalog
+    fam_tracks = FAMILY_TO_TRACKS.get(seed_family, {"spotify": [], "youtube": []})
+    fam_sp_backfill = fam_tracks.get("spotify", [])
+    fam_yt_backfill = fam_tracks.get("youtube", [])
+
+    if len(sp_pool) < 6 and fam_sp_backfill:
+        shuffled_sp_bf = list(fam_sp_backfill)
+        random.shuffle(shuffled_sp_bf)
+        sp_pool.extend(process_bucket(shuffled_sp_bf))
+
+    if len(yt_pool) < 6 and fam_yt_backfill:
+        shuffled_yt_bf = list(fam_yt_backfill)
+        random.shuffle(shuffled_yt_bf)
+        yt_pool.extend(process_bucket(shuffled_yt_bf))
+
+    # General backfill only if still below 6 (guaranteed genre-filtered)
     if len(sp_pool) < 6:
         sp_pool.extend(process_bucket(SPOTIFY_FEATURED))
     if len(yt_pool) < 6:
@@ -819,14 +1015,14 @@ def get_smart_recommendations(seed_id, seed_title, seed_artist, source="youtube"
         if primary_seed and primary_seed.lower() in cartist:
             c["reason"] = f"Spotify • More from {primary_seed}"
         else:
-            c["reason"] = f"Spotify • Similar to {primary_seed}" if primary_seed else "Spotify • Top hit"
+            c["reason"] = f"Spotify • Similar to {primary_seed}" if primary_seed else f"Spotify • Top {seed_family.capitalize()}"
 
     for c in yt_pool:
         cartist = (c.get("artist") or "").lower()
         if primary_seed and primary_seed.lower() in cartist:
             c["reason"] = f"YouTube • More from {primary_seed}"
         else:
-            c["reason"] = f"YouTube • Similar to {primary_seed}" if primary_seed else "YouTube • Trending"
+            c["reason"] = f"YouTube • Similar to {primary_seed}" if primary_seed else f"YouTube • Trending {seed_family.capitalize()}"
 
     # Perfect 50/50 interleaving balance (Spotify mode: SP, YT, SP, YT... / YT mode: YT, SP, YT, SP...)
     interleaved = []
@@ -1073,11 +1269,11 @@ YOUTUBE_FEATURED = [
         "source": "youtube"
     },
     {
-        "id": "aYr4fDuLhXg",
-        "title": "Without Me",
-        "artist": "Halsey",
-        "duration": "3:24",
-        "thumbnail": "https://i.ytimg.com/vi/aYr4fDuLhXg/hqdefault.jpg",
+        "id": "6ONRf7h3Mdk",
+        "title": "SICKO MODE",
+        "artist": "Travis Scott ft. Drake",
+        "duration": "5:12",
+        "thumbnail": "https://i.ytimg.com/vi/6ONRf7h3Mdk/hqdefault.jpg",
         "source": "youtube"
     }
 ]
@@ -1196,11 +1392,11 @@ SPOTIFY_FEATURED = [
         "source": "spotify"
     },
     {
-        "id": "k0TEcUm7lTk",
-        "title": "Shake It Off",
-        "artist": "Taylor Swift",
-        "duration": "3:39",
-        "thumbnail": "https://i.ytimg.com/vi/k0TEcUm7lTk/hqdefault.jpg",
+        "id": "tvTRZJ-4EyI",
+        "title": "HUMBLE.",
+        "artist": "Kendrick Lamar",
+        "duration": "2:57",
+        "thumbnail": "https://i.ytimg.com/vi/tvTRZJ-4EyI/hqdefault.jpg",
         "source": "spotify"
     },
     {
@@ -1228,11 +1424,11 @@ SPOTIFY_FEATURED = [
         "source": "spotify"
     },
     {
-        "id": "30YlLGeUReY",
-        "title": "Dakiti",
-        "artist": "Bad Bunny",
-        "duration": "3:25",
-        "thumbnail": "https://i.ytimg.com/vi/30YlLGeUReY/hqdefault.jpg",
+        "id": "Dst9gZkq1a8",
+        "title": "goosebumps",
+        "artist": "Travis Scott",
+        "duration": "4:03",
+        "thumbnail": "https://i.ytimg.com/vi/Dst9gZkq1a8/hqdefault.jpg",
         "source": "spotify"
     },
     {

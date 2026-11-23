@@ -1,11 +1,30 @@
-# Implementation Plan: History Navigation, Recently Listened Sidebar Category, Strict Platform Isolation & Pill Bar Anti-Clipping
+# Execution Plan: Lightning Player v2.0.0 Release & Updater Overhaul
 
-1. `research_notes.md` — findings from the search gate, with source URLs.
-2. `client/style.css` — Fix `.category-pill-bar` layout: remove restrictive fixed `height: 58px; max-height: 58px;` and replace with `min-height: 54px; height: auto; padding: 9px 8px;`, hide scrollbars (`scrollbar-width: none !important; ::-webkit-scrollbar { display: none !important; }`), remove `contain: layout;` to eliminate clipping on Windows rendering engines.
-3. `client/index.html` — Add "Recently Listened" item to sidebar LIBRARY section with clock icon and `#historyBadge` badge counter. Add `#clearHistoryBtn` in `.view-actions` for clearing history.
-4. `app.py` — Update `get_smart_recommendations()` and `/api/discover` to strictly enforce platform isolation: when `source == 'youtube'`, only YouTube tracks are queried and returned (no Spotify queries or cross-platform backfill); when `source == 'spotify'`, only Spotify tracks are queried and returned. Mixed tracks are only returned when explicitly requesting playlist contexts.
-5. `client/player.js` —
-   - **10-Track History Navigation Stack**: Introduce `playbackHistoryStack = []` (max 10 items) and `isNavigatingHistory` flag. When a track plays naturally or via user click, push the current track to `playbackHistoryStack`. When Previous is pressed (and `currentTime <= 3`), pop from `playbackHistoryStack` and play.
-   - **Recently Listened Category**: Add `switchTab('history')` rendering `state.history` via `renderTrackList()`. Wire up `elements.navHistoryBtn`, `elements.historyBadge`, and `elements.clearHistoryBtn`. Automatically prepend songs to `state.history` on playback (capped at 50, deduplicated, persisted to localStorage).
-   - **Platform Isolation on Discovery**: In `loadPopularTracks()`, filter tracks in `for_you` and `categories` to strictly match `state.activeSource`. In `triggerSmartAutoplay()` and `playNextTrack()`, enforce `cand.source === state.activeSource` unless `state.playbackContext === 'playlist'`.
-6. `test_verification.md` & PyInstaller build — Compile updated executable `Lightning Player.exe`, package zip archive, and run verification suite confirming history stack, recently listened category, strict platform isolation on discover, and pill bar geometry.
+## 1. Research & Analysis (Complete)
+- `research_notes.md`: Documents Windows process file locking (`ERROR_SHARING_VIOLATION`), process tree termination (`taskkill /f /pid`), batch working directory preservation (`cd /d`), and semver comparison normalization.
+
+## 2. Implementation & Fixes (Complete)
+- **Windows Self-Updater Overhaul (`app.py`)**:
+  - Implemented PID and process name taskkill in updater bootstrap script before file swap.
+  - Active polling loop awaiting kernel process termination (`tasklist /fi "pid eq {pid}"`).
+  - Robust 10-attempt move/copy replacement loop with retry delays.
+  - Added `cd /d "{target_dir}"` before spawning target executable to ensure working directory context is retained.
+  - Added automatic `.zip` archive extraction when release assets are bundled in zip packages.
+  - Normalized version comparison to 3-part semver padding (`[2] == [2, 0, 0]`).
+  - Bumped `APP_VERSION = "2.0.0"`.
+- **Category Pill Bar Anti-Clipping (`client/style.css`)**:
+  - Set `min-height: 56px; height: auto; padding: 10px 8px;` and removed `contain: layout` and fixed 58px bounding.
+  - Verified with CDP rendering: pills have 10px breathing room on top and bottom; zero clipping on active border and box-shadow.
+- **Library & Navigation Enhancements (`client/index.html`, `client/player.js`)**:
+  - Added Recently Listened category to left sidebar with real-time badge count and Clear History action.
+  - Added 10-track reverse traversal stack on Previous Track button.
+  - Strict platform isolation on Discovery tab (100% YouTube on YouTube mode, 100% Spotify on Spotify mode; cross-platform allowed only in saved user playlists).
+- **Binary & Version Artifacts (`version_info.txt`, `dist/Lightning Player.exe`, `Lightning Player.exe`)**:
+  - Bumped Windows file and product version to `2.0.0.0`.
+  - Built fresh standalone one-file executable `Lightning Player.exe` via PyInstaller.
+  - Packaged standalone release zip `Lightning-Player-v2.0.0-Windows-x64.zip`.
+
+## 3. Verification & Testing (Complete)
+- Automated updater simulation verified clean PID kill, file swap, and target launch.
+- Headless browser CDP screenshot analysis confirmed intact 36px pill rendering without clipping.
+- Discovery API verified 100% pure platform isolation for YouTube and Spotify modes.

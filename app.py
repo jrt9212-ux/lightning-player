@@ -112,7 +112,7 @@ IS_MAXIMIZED = False
 CLOSING = False
 CLOSING_LOCK = threading.Lock()
 
-APP_VERSION = "1.2.0"
+APP_VERSION = "1.2.1"
 
 UPDATE_STATE = {
     "current_version": APP_VERSION,
@@ -849,31 +849,41 @@ def get_smart_recommendations(seed_id, seed_title, seed_artist, source="youtube"
             if len(sampled_taste) >= sample_k:
                 break
 
-    # Build queries for BOTH Spotify and YouTube catalogs to guarantee a 50/50 balance
+    # Strict platform routing: YouTube mode -> 100% YouTube, Spotify mode -> 100% Spotify.
+    # Only mixed/playlist mode queries and returns both platforms.
+    is_sp_only = (source == "spotify")
+    is_yt_only = (source == "youtube")
+    is_mixed = not (is_sp_only or is_yt_only)
+
     sp_queries = []
     yt_queries = []
 
-    if primary_seed and primary_seed.lower() != "unknown artist":
-        sp_queries.append(primary_seed)
-        if clean_title:
-            sp_queries.append(f"{primary_seed} {clean_title}")
-        yt_queries.append(f"{primary_seed} official audio")
-        yt_queries.append(f"{primary_seed} songs")
-    else:
-        sp_queries.append(f"{seed_family} hits")
-        yt_queries.append(f"{seed_family} music songs")
+    if is_sp_only or is_mixed:
+        if primary_seed and primary_seed.lower() != "unknown artist":
+            sp_queries.append(primary_seed)
+            if clean_title:
+                sp_queries.append(f"{primary_seed} {clean_title}")
+        else:
+            sp_queries.append(f"{seed_family} hits")
+        for sim in sampled_similars:
+            sp_queries.append(sim)
+        if secondary_seeds:
+            sp_queries.append(secondary_seeds[0])
+        for tfav in sampled_taste:
+            sp_queries.append(tfav)
 
-    for sim in sampled_similars:
-        sp_queries.append(sim)
-        yt_queries.append(f"{sim} official audio")
-
-    if secondary_seeds:
-        sp_queries.append(secondary_seeds[0])
-        yt_queries.append(f"{secondary_seeds[0]} songs")
-
-    for tfav in sampled_taste:
-        sp_queries.append(tfav)
-        yt_queries.append(f"{tfav} songs")
+    if is_yt_only or is_mixed:
+        if primary_seed and primary_seed.lower() != "unknown artist":
+            yt_queries.append(f"{primary_seed} official audio")
+            yt_queries.append(f"{primary_seed} songs")
+        else:
+            yt_queries.append(f"{seed_family} music songs")
+        for sim in sampled_similars:
+            yt_queries.append(f"{sim} official audio")
+        if secondary_seeds:
+            yt_queries.append(secondary_seeds[0])
+        for tfav in sampled_taste:
+            yt_queries.append(f"{tfav} songs")
 
     raw_sp = []
     raw_yt = []
@@ -891,23 +901,24 @@ def get_smart_recommendations(seed_id, seed_title, seed_artist, source="youtube"
             return []
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
-        f_sp = [executor.submit(run_sp, q) for q in sp_queries[:4]]
-        f_yt = [executor.submit(run_yt, q) for q in yt_queries[:4]]
+        f_sp = [executor.submit(run_sp, q) for q in sp_queries[:4]] if (is_sp_only or is_mixed) else []
+        f_yt = [executor.submit(run_yt, q) for q in yt_queries[:4]] if (is_yt_only or is_mixed) else []
 
         all_futures = f_sp + f_yt
-        done, _ = concurrent.futures.wait(all_futures, timeout=3.5)
-        for f in f_sp:
-            if f in done:
-                try:
-                    raw_sp.extend(f.result())
-                except Exception:
-                    pass
-        for f in f_yt:
-            if f in done:
-                try:
-                    raw_yt.extend(f.result())
-                except Exception:
-                    pass
+        if all_futures:
+            done, _ = concurrent.futures.wait(all_futures, timeout=3.5)
+            for f in f_sp:
+                if f in done:
+                    try:
+                        raw_sp.extend(f.result())
+                    except Exception:
+                        pass
+            for f in f_yt:
+                if f in done:
+                    try:
+                        raw_yt.extend(f.result())
+                    except Exception:
+                        pass
 
     seen_ids = set(exclude_ids or [])
     if seed_id:
@@ -987,28 +998,28 @@ def get_smart_recommendations(seed_id, seed_title, seed_artist, source="youtube"
             cleaned.append(c)
         return cleaned
 
-    sp_pool = process_bucket(raw_sp)
-    yt_pool = process_bucket(raw_yt)
+    sp_pool = process_bucket(raw_sp) if (is_sp_only or is_mixed) else []
+    yt_pool = process_bucket(raw_yt) if (is_yt_only or is_mixed) else []
 
     # Category-locked backfill from local catalog
     fam_tracks = FAMILY_TO_TRACKS.get(seed_family, {"spotify": [], "youtube": []})
     fam_sp_backfill = fam_tracks.get("spotify", [])
     fam_yt_backfill = fam_tracks.get("youtube", [])
 
-    if len(sp_pool) < 6 and fam_sp_backfill:
+    if (is_sp_only or is_mixed) and len(sp_pool) < 12 and fam_sp_backfill:
         shuffled_sp_bf = list(fam_sp_backfill)
         random.shuffle(shuffled_sp_bf)
         sp_pool.extend(process_bucket(shuffled_sp_bf))
 
-    if len(yt_pool) < 6 and fam_yt_backfill:
+    if (is_yt_only or is_mixed) and len(yt_pool) < 12 and fam_yt_backfill:
         shuffled_yt_bf = list(fam_yt_backfill)
         random.shuffle(shuffled_yt_bf)
         yt_pool.extend(process_bucket(shuffled_yt_bf))
 
-    # General backfill only if still below 6 (guaranteed genre-filtered)
-    if len(sp_pool) < 6:
+    # General backfill only if still below 10 (guaranteed genre-filtered)
+    if (is_sp_only or is_mixed) and len(sp_pool) < 10:
         sp_pool.extend(process_bucket(SPOTIFY_FEATURED))
-    if len(yt_pool) < 6:
+    if (is_yt_only or is_mixed) and len(yt_pool) < 10:
         yt_pool.extend(process_bucket(YOUTUBE_FEATURED))
 
     random.shuffle(sp_pool)
@@ -1016,6 +1027,7 @@ def get_smart_recommendations(seed_id, seed_title, seed_artist, source="youtube"
 
     # Assign informative reasons
     for c in sp_pool:
+        c["source"] = "spotify"
         cartist = (c.get("artist") or "").lower()
         if primary_seed and primary_seed.lower() in cartist:
             c["reason"] = f"Spotify • More from {primary_seed}"
@@ -1023,16 +1035,28 @@ def get_smart_recommendations(seed_id, seed_title, seed_artist, source="youtube"
             c["reason"] = f"Spotify • Similar to {primary_seed}" if primary_seed else f"Spotify • Top {seed_family.capitalize()}"
 
     for c in yt_pool:
+        c["source"] = "youtube"
         cartist = (c.get("artist") or "").lower()
         if primary_seed and primary_seed.lower() in cartist:
             c["reason"] = f"YouTube • More from {primary_seed}"
         else:
             c["reason"] = f"YouTube • Similar to {primary_seed}" if primary_seed else f"YouTube • Trending {seed_family.capitalize()}"
 
-    # Perfect 50/50 interleaving balance (Spotify mode: SP, YT, SP, YT... / YT mode: YT, SP, YT, SP...)
+    # Strict platform mode: Spotify mode returns 100% Spotify tracks; YouTube mode returns 100% YouTube tracks
+    if is_sp_only:
+        for c in sp_pool[:20]:
+            RECENT_RECOMMENDED_IDS.append(c["id"])
+        return sp_pool[:20]
+
+    if is_yt_only:
+        for c in yt_pool[:20]:
+            RECENT_RECOMMENDED_IDS.append(c["id"])
+        return yt_pool[:20]
+
+    # Mixed mode: interleaved 50/50 balance (only for playlist context or explicit mixed mode)
     interleaved = []
-    first_pool = sp_pool if source == "spotify" else yt_pool
-    second_pool = yt_pool if source == "spotify" else sp_pool
+    first_pool = sp_pool
+    second_pool = yt_pool
 
     while first_pool or second_pool:
         if first_pool:

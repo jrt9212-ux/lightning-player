@@ -622,6 +622,17 @@ body::after {
   flex-shrink: 0;
 }
 
+.history-badge {
+  margin-left: auto;
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #38bdf8, #6366f1);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
 /* Routing Card */
 .routing-card {
   background: var(--glass-bg);
@@ -824,26 +835,21 @@ body::after {
   align-items: center;
   gap: 10px;
   overflow-x: auto;
-  overflow-y: hidden !important;
-  padding: 10px 12px;
-  margin-top: 6px;
+  overflow-y: hidden;
+  padding: 10px 8px;
+  margin-top: 4px;
   margin-bottom: 8px;
-  height: 58px;
-  min-height: 58px;
-  max-height: 58px;
+  min-height: 56px;
+  height: auto;
   box-sizing: border-box;
-  contain: layout;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(56, 189, 248, 0.35) transparent;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 
 .category-pill-bar::-webkit-scrollbar {
-  height: 4px;
-}
-
-.category-pill-bar::-webkit-scrollbar-thumb {
-  background: rgba(56, 189, 248, 0.35);
-  border-radius: 4px;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 .category-pill {
@@ -853,15 +859,13 @@ body::after {
   gap: 8px;
   padding: 0 18px;
   height: 36px;
-  min-height: 36px;
-  max-height: 36px;
   box-sizing: border-box;
   flex-shrink: 0;
   border-radius: 9999px;
   font-family: inherit;
   font-size: 0.86rem;
   font-weight: 600;
-  line-height: 36px;
+  line-height: 1;
   color: var(--text-muted);
   background: rgba(255, 255, 255, 0.04);
   border: 1.5px solid rgba(255, 255, 255, 0.08);

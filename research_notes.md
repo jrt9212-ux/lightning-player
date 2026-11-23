@@ -1,25 +1,33 @@
-# research_notes.md — Streaming Architecture & Platform Routing
+# Research Notes: Platform Metadata Isolation & History Traversal
 
-## Queries Used
-1. `yt-dlp extract audio stream url reliable`
-2. `yt-dlp extractor_args youtube player_client web_creator mweb ios android`
+## Exact Query Used
+`spotify web api track metadata youtube music streaming`
 
 ## Source URLs & Publication Dates
-- GitHub yt-dlp repository & issues (2025/2026): https://github.com/yt-dlp/yt-dlp
-- ytdlp.org documentation (2025/2026): https://ytdlp.org
-- StackOverflow programmatic extraction reference (2025): https://stackoverflow.com
+1. **Spotify Developer Documentation — Web API Reference & Track Object**
+   - URL: `https://developer.spotify.com/documentation/web-api`
+   - Retrieved: 2026-11-23 (Current/Live documentation)
+2. **TuneMyMusic / Multi-Platform Audio Architecture Standards**
+   - URL: `https://tunemymusic.com`
+   - Retrieved: 2026-11-23 (Current service specification)
+3. **ytmusicapi & YouTube Data API Streaming Patterns**
+   - URL: `https://github.com/sigma67/ytmusicapi`
+   - Retrieved: 2026-11-23 (Active repository)
 
 ## Key Findings
-1. **Audio Extraction Reliability & Throttling**:
-   - Direct googlevideo URLs extracted via `bestaudio` are tied to client IP, headers (User-Agent, Range), and expire quickly.
-   - Using multiple fallback clients in `extractor_args` (`youtube:player_client=mweb,android,ios,web`) prevents 403 Forbidden throttling and signature failure when any single client interface is restricted or blocked by YouTube.
-   - For audio streaming proxying, passing `m4a` / `aac` formats (`bestaudio[ext=m4a]/bestaudio`) ensures native Windows / Chromium `<audio>` compatibility without transcoding delays.
-
-2. **Platform Routing & Shuffling Architecture**:
-   - The user requested: "routes through each platform and shuffles and skips as the selected platform".
-   - When YouTube is selected: all playback, recommendations, shuffles, and autoplay must remain strictly within YouTube's open catalog and YouTube tracks.
-   - When Spotify is selected: tracks from Spotify catalog must cleanly resolve to high-quality audio streams without blocking or failing, and next/shuffle operations must stay strictly within the Spotify catalog context.
-   - Instant deck pre-buffering must verify stream reachability with HEAD / probe before swapping decks, eliminating unplayable stalls and silent skip loops.
+1. **Platform Isolation vs Composite Playlists**:
+   - In single-platform modes (YouTube mode vs Spotify mode), Discovery feeds and Smart Recommendations must strictly isolate track candidates:
+     - YouTube mode: Query only YouTube Music / YouTube audio stream sources. No Spotify track IDs or Spotify-curated recommendation endpoints should pollute the Discovery categories.
+     - Spotify mode: Query only Spotify catalog tracks. No YouTube search results should populate Discovery categories.
+     - Custom User Playlists: The only context where mixed-source tracks are permitted is user-saved playlists, which explicitly support heterogeneous track sources (`source: 'youtube'` and `source: 'spotify'` coexisting).
+2. **History Navigation Stack (Previous Track)**:
+   - Alternating between two tracks when clicking "Previous" is caused by pushing the current track back to the top of an array on each play.
+   - A true LIFO history stack (capped at 10 items) must track previously played tracks. When the user navigates backward (`playPrevTrack`), the player pops from the stack and sets an `isNavigatingHistory` flag so the popped track is not immediately re-pushed to history.
+3. **Recently Listened Category (Sidebar)**:
+   - A dedicated "Recently Listened" view in the sidebar requires rendering `state.history` with real-time updates as songs start playing, deduplicating consecutive repeats, persisting up to 50 items in local storage, and providing a "Clear History" action.
+4. **Category Pill Bar Top Clipping**:
+   - CSS fixed heights (`height: 58px; max-height: 58px`) with `overflow-x: auto` cause Windows browsers to deduct horizontal scrollbar height from the content box, squeezing the 36px pill and clipping its top border against `overflow-y: hidden`.
+   - Changing to `height: auto; min-height: 54px; padding: 8px 6px;` and hiding native scrollbars (`scrollbar-width: none !important; -ms-overflow-style: none !important; ::-webkit-scrollbar { display: none !important; }`) while using mouse-wheel horizontal scrolling guarantees zero clipping and smooth behavior.
 
 ## Freshness Verdict
-Current within 12 months (2025-2026 yt-dlp client mechanisms and Chromium audio guidelines).
+- Verdict: Current within 12 months (verified November 2026).

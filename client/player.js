@@ -31,8 +31,13 @@
 
   const STORAGE_KEYS = {
     LIKED: 'tubefast_liked_songs',
-    PLAYLISTS: 'tubefast_playlists'
+    PLAYLISTS: 'tubefast_playlists',
+    HISTORY: 'tubefast_history'
   };
+
+  // Playback History Stack for 'Previous' button (remembers last 10 played songs)
+  const playbackHistoryStack = [];
+  let isNavigatingHistory = false;
 
   // Dual-Deck Gapless Audio Elements
   const deckA = document.getElementById('deckA') || document.getElementById('audioEngine');
@@ -57,11 +62,14 @@
     loaderText: document.getElementById('loaderText'),
     viewTitle: document.getElementById('viewTitle'),
     viewSubtitle: document.getElementById('viewSubtitle'),
+    clearHistoryBtn: document.getElementById('clearHistoryBtn'),
     clearQueueBtn: document.getElementById('clearQueueBtn'),
     playlistPlayAllBtn: document.getElementById('playlistPlayAllBtn'),
     deletePlaylistBtn: document.getElementById('deletePlaylistBtn'),
     queueBadge: document.getElementById('queueBadge'),
     likedBadge: document.getElementById('likedBadge'),
+    historyBadge: document.getElementById('historyBadge'),
+    navHistoryBtn: document.getElementById('navHistoryBtn'),
     playlistsList: document.getElementById('playlistsList'),
     sidebarCreatePlaylistBtn: document.getElementById('sidebarCreatePlaylistBtn'),
     engineBadge: document.getElementById('engineBadge'),
@@ -136,7 +144,8 @@
     if (!libraryLoadedFromDisk) return;
     const payload = JSON.stringify({
       liked: state.likedSongs,
-      playlists: state.playlists
+      playlists: state.playlists,
+      history: state.history
     });
     fetch('/api/library', {
       method: 'POST',
@@ -147,10 +156,25 @@
     });
   }
 
+  function updateHistoryBadge() {
+    if (elements.historyBadge) {
+      elements.historyBadge.textContent = state.history.length;
+    }
+  }
+
+  function saveHistory() {
+    try {
+      localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(state.history));
+    } catch (e) {}
+    updateHistoryBadge();
+    scheduleSaveLibraryToDisk();
+  }
+
   function loadSavedData() {
     // 1. Instant local storage read for snappy initial paint
     let localLiked = [];
     let localPlaylists = [];
+    let localHistory = [];
     try {
       const rawLiked = localStorage.getItem(STORAGE_KEYS.LIKED);
       if (rawLiked) localLiked = JSON.parse(rawLiked);
@@ -159,10 +183,16 @@
       const rawPlaylists = localStorage.getItem(STORAGE_KEYS.PLAYLISTS);
       if (rawPlaylists) localPlaylists = JSON.parse(rawPlaylists);
     } catch (e) {}
+    try {
+      const rawHistory = localStorage.getItem(STORAGE_KEYS.HISTORY);
+      if (rawHistory) localHistory = JSON.parse(rawHistory);
+    } catch (e) {}
 
     state.likedSongs = Array.isArray(localLiked) ? localLiked : [];
     state.playlists = Array.isArray(localPlaylists) ? localPlaylists : [];
+    state.history = Array.isArray(localHistory) ? localHistory : [];
     updateLikedBadge();
+    updateHistoryBadge();
     renderPlaylistsSidebar();
 
     // 2. Fetch authoritative persistent library from disk
@@ -176,14 +206,21 @@
         if (data && Array.isArray(data.playlists)) {
           state.playlists = data.playlists;
         }
+        if (data && Array.isArray(data.history)) {
+          state.history = data.history;
+        }
         try {
           localStorage.setItem(STORAGE_KEYS.LIKED, JSON.stringify(state.likedSongs));
           localStorage.setItem(STORAGE_KEYS.PLAYLISTS, JSON.stringify(state.playlists));
+          localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(state.history));
         } catch (e) {}
         updateLikedBadge();
+        updateHistoryBadge();
         renderPlaylistsSidebar();
         if (state.activeTab === 'liked') {
           renderLikedSongsView();
+        } else if (state.activeTab === 'history') {
+          renderTrackList(state.history, false);
         } else if (state.activeTab && state.activeTab.startsWith('pl_')) {
           renderPlaylistView(state.activeTab);
         }
@@ -457,6 +494,7 @@
     });
 
     // Reset action buttons visibility
+    if (elements.clearHistoryBtn) elements.clearHistoryBtn.style.display = 'none';
     elements.clearQueueBtn.style.display = 'none';
     elements.playlistPlayAllBtn.style.display = 'none';
     elements.deletePlaylistBtn.style.display = 'none';
@@ -477,7 +515,13 @@
       }
     } else {
       if (elements.categoryPillBar) elements.categoryPillBar.style.display = 'none';
-      if (tab === 'queue') {
+      if (tab === 'history') {
+        elements.viewTitle.textContent = 'Recently Listened';
+        elements.viewSubtitle.textContent = `${state.history.length} recently played track(s)`;
+        if (elements.clearHistoryBtn) elements.clearHistoryBtn.style.display = state.history.length > 0 ? 'inline-block' : 'none';
+        elements.playlistPlayAllBtn.style.display = state.history.length > 0 ? 'inline-flex' : 'none';
+        renderTrackList(state.history, false);
+      } else if (tab === 'queue') {
         elements.viewTitle.textContent = 'Current Queue';
         elements.viewSubtitle.textContent = `${state.queue.length} track(s) in queue`;
         elements.clearQueueBtn.style.display = state.queue.length > 0 ? 'inline-block' : 'none';
@@ -868,6 +912,18 @@
 
       const res = await fetch(`/api/discover?source=${state.activeSource}`);
       const data = await res.json();
+      
+      // Strict platform isolation on Discovery tab: only YouTube on YouTube mode, only Spotify on Spotify mode
+      if (data.for_you && Array.isArray(data.for_you)) {
+        data.for_you = data.for_you.filter(t => !t.source || t.source === state.activeSource);
+      }
+      if (data.categories) {
+        Object.values(data.categories).forEach(cat => {
+          if (cat.tracks && Array.isArray(cat.tracks)) {
+            cat.tracks = cat.tracks.filter(t => !t.source || t.source === state.activeSource);
+          }
+        });
+      }
       state.discoverData = data;
 
       // Flatten tracks into state.currentList for autoplay / indexing
@@ -1069,8 +1125,8 @@
     // 2. Active List (Category, Playlist, Liked Songs, or Search Results)
     if (!upcoming && state.currentList && state.currentList.length > 0) {
       if (state.isShuffling) {
-        // In shuffle mode: pick random unplayed candidate matching active platform
-        const pool = state.currentList.filter(t => !t.unplayable && !deadTracksSet.has(t.id) && (!state.currentTrack || t.id !== state.currentTrack.id) && (!t.source || t.source === state.activeSource));
+        // In shuffle mode: pick random unplayed candidate matching active platform (or any platform in saved playlists)
+        const pool = state.currentList.filter(t => !t.unplayable && !deadTracksSet.has(t.id) && (!state.currentTrack || t.id !== state.currentTrack.id) && (state.playbackContext === 'playlist' || !t.source || t.source === state.activeSource));
         const unplayed = pool.filter(t => !recentPlayedIds.includes(t.id));
         const candidates = unplayed.length > 0 ? unplayed : pool;
         if (candidates.length > 0) {
@@ -1082,7 +1138,7 @@
         if (curIdx !== -1) {
           for (let i = curIdx + 1; i < state.currentList.length; i++) {
             const cand = state.currentList[i];
-            if (!cand.unplayable && !deadTracksSet.has(cand.id) && (!cand.source || cand.source === state.activeSource)) {
+            if (!cand.unplayable && !deadTracksSet.has(cand.id) && (state.playbackContext === 'playlist' || !cand.source || cand.source === state.activeSource)) {
               upcoming = cand;
               break;
             }
@@ -1090,7 +1146,7 @@
           if (!upcoming && state.isLooping) {
             for (let i = 0; i <= curIdx; i++) {
               const cand = state.currentList[i];
-              if (!cand.unplayable && !deadTracksSet.has(cand.id) && (!cand.source || cand.source === state.activeSource)) {
+              if (!cand.unplayable && !deadTracksSet.has(cand.id) && (state.playbackContext === 'playlist' || !cand.source || cand.source === state.activeSource)) {
                 upcoming = cand;
                 break;
               }
@@ -1122,6 +1178,28 @@
           preloadNextTrack(smartAutoplayQueue[0]);
         }
       });
+    }
+  }
+
+  // Record track play to local Recently Listened history
+  function recordRecentlyListened(track) {
+    if (!track || !track.id) return;
+    const cleanItem = {
+      id: track.id,
+      source: track.source || (state.activeSource || 'youtube'),
+      title: track.title || 'Unknown Title',
+      artist: track.artist || 'Unknown Artist',
+      duration: track.duration || '--:--',
+      thumbnail: track.thumbnail || '',
+      playedAt: Date.now()
+    };
+    state.history = [cleanItem, ...state.history.filter(t => t.id !== track.id)].slice(0, 50);
+    saveHistory();
+    if (state.activeTab === 'history') {
+      renderTrackList(state.history, false);
+      elements.viewSubtitle.textContent = `${state.history.length} recently played track(s)`;
+      if (elements.clearHistoryBtn) elements.clearHistoryBtn.style.display = state.history.length > 0 ? 'inline-block' : 'none';
+      if (elements.playlistPlayAllBtn) elements.playlistPlayAllBtn.style.display = state.history.length > 0 ? 'inline-flex' : 'none';
     }
   }
 
@@ -1211,7 +1289,15 @@
     preloadedTrack = null;
     isStandbyReady = false;
 
+    if (state.currentTrack && state.currentTrack.id !== track.id && !isNavigatingHistory) {
+      playbackHistoryStack.push(state.currentTrack);
+      if (playbackHistoryStack.length > 10) {
+        playbackHistoryStack.shift();
+      }
+    }
+
     state.currentTrack = track;
+    recordRecentlyListened(track);
     currentTrackLogged = false;
     stallCounter = 0;
     lastAudioPosition = 0;
@@ -1418,7 +1504,16 @@
 
     preloadedTrack = null;
     isStandbyReady = false;
+
+    if (state.currentTrack && state.currentTrack.id !== track.id && !isNavigatingHistory) {
+      playbackHistoryStack.push(state.currentTrack);
+      if (playbackHistoryStack.length > 10) {
+        playbackHistoryStack.shift();
+      }
+    }
+
     state.currentTrack = track;
+    recordRecentlyListened(track);
     currentTrackLogged = false;
     stallCounter = 0;
     lastAudioPosition = 0;
@@ -1556,8 +1651,8 @@
     // 2. Play from Active List (Discover category, Playlist, Liked Songs, or Search)
     if (state.currentList && state.currentList.length > 0) {
       if (state.isShuffling) {
-        // True Shuffle Mode: pick a random unplayed track from the active list on current platform
-        const pool = state.currentList.filter(t => !t.unplayable && !deadTracksSet.has(t.id) && (!state.currentTrack || t.id !== state.currentTrack.id) && (!t.source || t.source === state.activeSource));
+        // True Shuffle Mode: pick a random unplayed track from the active list on current platform (or any platform if saved playlist)
+        const pool = state.currentList.filter(t => !t.unplayable && !deadTracksSet.has(t.id) && (!state.currentTrack || t.id !== state.currentTrack.id) && (state.playbackContext === 'playlist' || !t.source || t.source === state.activeSource));
         const unplayed = pool.filter(t => !recentPlayedIds.includes(t.id));
         const candidates = unplayed.length > 0 ? unplayed : pool;
         if (candidates.length > 0) {
@@ -1575,7 +1670,7 @@
         if (curIdx !== -1) {
           for (let i = curIdx + 1; i < state.currentList.length; i++) {
             const cand = state.currentList[i];
-            if (!cand.unplayable && !deadTracksSet.has(cand.id) && (!cand.source || cand.source === state.activeSource)) {
+            if (!cand.unplayable && !deadTracksSet.has(cand.id) && (state.playbackContext === 'playlist' || !cand.source || cand.source === state.activeSource)) {
               if (preloadedTrack && isStandbyReady && preloadedTrack.id === cand.id) {
                 executeDeckSwapAndPlay(cand);
               } else {
@@ -1588,7 +1683,7 @@
           if (state.isLooping) {
             for (let i = 0; i <= curIdx; i++) {
               const cand = state.currentList[i];
-              if (!cand.unplayable && !deadTracksSet.has(cand.id) && (!cand.source || cand.source === state.activeSource)) {
+              if (!cand.unplayable && !deadTracksSet.has(cand.id) && (state.playbackContext === 'playlist' || !cand.source || cand.source === state.activeSource)) {
                 if (preloadedTrack && isStandbyReady && preloadedTrack.id === cand.id) {
                   executeDeckSwapAndPlay(cand);
                 } else {
@@ -1624,13 +1719,13 @@
       return;
     }
 
-    // 1. If recentPlayedIds has previous tracks, go back to previously played song
-    if (recentPlayedIds.length > 1) {
-      const prevId = recentPlayedIds[1];
-      const cand = (state.currentList && state.currentList.find(t => t.id === prevId)) ||
-                   (state.discoverData && state.discoverData.categories && Object.values(state.discoverData.categories).flatMap(c => c.tracks || []).find(t => t.id === prevId));
-      if (cand) {
-        playTrackImmediately(cand);
+    // 1. Pop from the 10-track history stack (remembers last 10 played songs in true LIFO order)
+    if (playbackHistoryStack.length > 0) {
+      const prevTrack = playbackHistoryStack.pop();
+      if (prevTrack && prevTrack.id) {
+        isNavigatingHistory = true;
+        playTrackImmediately(prevTrack);
+        isNavigatingHistory = false;
         return;
       }
     }
@@ -1651,6 +1746,9 @@
         return;
       }
     }
+
+    // 3. Fallback: restart track from 0
+    currentDeck.currentTime = 0;
   }
 
   // Perceptual exponential volume curve (gamma = 2.2)
@@ -1855,6 +1953,20 @@
     });
 
     elements.clearQueueBtn.addEventListener('click', clearQueue);
+
+    if (elements.clearHistoryBtn) {
+      elements.clearHistoryBtn.addEventListener('click', () => {
+        if (!state.history || state.history.length === 0) return;
+        if (confirm('Clear all recently listened songs?')) {
+          state.history = [];
+          saveHistory();
+          renderTrackList([], false);
+          elements.viewSubtitle.textContent = '0 recently played track(s)';
+          elements.clearHistoryBtn.style.display = 'none';
+          elements.playlistPlayAllBtn.style.display = 'none';
+        }
+      });
+    }
 
     // Play All from Playlist / Liked Songs
     if (elements.playlistPlayAllBtn) {
@@ -2140,6 +2252,9 @@
     if (state.activeTab === 'liked') {
       list = state.likedSongs;
       state.playbackContext = 'liked';
+    } else if (state.activeTab === 'history') {
+      list = state.history;
+      state.playbackContext = 'history';
     } else if (state.activeTab && state.activeTab.startsWith('pl_')) {
       const pl = state.playlists.find(p => p.id === state.activeTab);
       if (pl) list = pl.tracks;

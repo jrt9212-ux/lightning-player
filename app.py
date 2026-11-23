@@ -112,7 +112,7 @@ IS_MAXIMIZED = False
 CLOSING = False
 CLOSING_LOCK = threading.Lock()
 
-APP_VERSION = "1.2.1"
+APP_VERSION = "2.0.0"
 
 UPDATE_STATE = {
     "current_version": APP_VERSION,
@@ -145,13 +145,16 @@ def get_updater_config():
 
 def is_version_newer(latest, current):
     def parse_v(v):
-        return [int(x) for x in re.findall(r'\d+', str(v))]
+        parts = [int(x) for x in re.findall(r'\d+', str(v))]
+        while len(parts) < 3:
+            parts.append(0)
+        return parts[:3]
     try:
         p_latest = parse_v(latest)
         p_current = parse_v(current)
         return p_latest > p_current
     except Exception:
-        return str(latest).strip().lower() != str(current).strip().lower()
+        return False
 
 def check_for_updates():
     cfg = get_updater_config()
@@ -195,20 +198,33 @@ def check_for_updates():
                     tag = data.get("tag_name", "").lstrip("v")
                     body = data.get("body", "")
                     assets = data.get("assets", [])
-                    exe_url = None
+                    download_url = None
+
+                    # Prioritize .exe assets first
                     for a in assets:
                         name = a.get("name", "").lower()
                         if name.endswith(".exe"):
-                            exe_url = a.get("browser_download_url")
+                            download_url = a.get("browser_download_url")
                             break
 
-                    if tag and is_version_newer(tag, APP_VERSION) and exe_url:
+                    # Fallback to .zip containing the windows executable
+                    if not download_url:
+                        for a in assets:
+                            name = a.get("name", "").lower()
+                            if name.endswith(".zip") and ("win" in name or "x64" in name or "player" in name):
+                                download_url = a.get("browser_download_url")
+                                break
+
+                    if not download_url and assets:
+                        download_url = assets[0].get("browser_download_url")
+
+                    if tag and is_version_newer(tag, APP_VERSION) and download_url:
                         with UPDATE_LOCK:
                             UPDATE_STATE["latest_version"] = tag
                             UPDATE_STATE["update_available"] = True
-                            UPDATE_STATE["download_url"] = exe_url
+                            UPDATE_STATE["download_url"] = download_url
                             UPDATE_STATE["changelog"] = body
-                        log(f"Update available via GitHub: v{tag} -> {exe_url}")
+                        log(f"Update available via GitHub: v{tag} -> {download_url}")
                         return UPDATE_STATE
         except Exception as e:
             log(f"GitHub update check failed for {repo}: {e}")
@@ -225,16 +241,18 @@ def trigger_update_download():
 
     def worker():
         try:
+            import zipfile, shutil
             url = UPDATE_STATE["download_url"]
             temp_dir = tempfile.gettempdir()
-            new_exe = os.path.join(temp_dir, f"LightningPlayer_v{UPDATE_STATE['latest_version']}_{int(time.time())}.exe")
+            is_zip = url.lower().endswith(".zip") or ".zip?" in url.lower()
+            download_dest = os.path.join(temp_dir, f"lp_dl_{int(time.time())}.zip" if is_zip else f"lp_dl_{int(time.time())}.exe")
 
-            log(f"Downloading update from {url} to {new_exe}...")
+            log(f"Downloading update from {url} to {download_dest}...")
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(req, timeout=40) as resp:
+            with urllib.request.urlopen(req, timeout=60) as resp:
                 total_len = int(resp.headers.get("content-length", 0))
                 downloaded = 0
-                with open(new_exe, "wb") as f:
+                with open(download_dest, "wb") as f:
                     while True:
                         chunk = resp.read(65536)
                         if not chunk:
@@ -246,11 +264,23 @@ def trigger_update_download():
                             with UPDATE_LOCK:
                                 UPDATE_STATE["progress"] = min(99, pct)
 
+            if is_zip:
+                extracted_exe = os.path.join(temp_dir, f"lp_extracted_{int(time.time())}.exe")
+                with zipfile.ZipFile(download_dest, "r") as z:
+                    exe_members = [m for m in z.namelist() if m.lower().endswith(".exe")]
+                    if not exe_members:
+                        raise RuntimeError("No executable found inside downloaded update archive.")
+                    with z.open(exe_members[0]) as zf, open(extracted_exe, "wb") as out_f:
+                        shutil.copyfileobj(zf, out_f)
+                new_exe = extracted_exe
+            else:
+                new_exe = download_dest
+
             with UPDATE_LOCK:
                 UPDATE_STATE["downloading"] = False
                 UPDATE_STATE["progress"] = 100
                 UPDATE_STATE["ready_to_restart"] = True
-            log("Update download complete. Executing in-place restart...")
+            log(f"Update download complete ({new_exe}). Executing in-place restart...")
             execute_windows_swap_and_restart(new_exe)
         except Exception as e:
             log(f"Update download failure: {e}")
@@ -262,17 +292,20 @@ def trigger_update_download():
     return True
 
 def execute_windows_swap_and_restart(new_exe_path):
-    time.sleep(1.2)
+    time.sleep(0.5)
     if getattr(sys, 'frozen', False):
         target_exe = os.path.abspath(sys.executable)
     else:
         target_exe = os.path.abspath("Lightning Player.exe")
 
+    target_dir = os.path.dirname(target_exe)
+    target_name = os.path.basename(target_exe)
+    current_pid = os.getpid()
+
     ts = int(time.time())
     bat_path = os.path.join(tempfile.gettempdir(), f"lp_swap_{ts}.bat")
     vbs_path = os.path.join(tempfile.gettempdir(), f"lp_run_{ts}.vbs")
 
-    # Clean batch script: moves the new executable into place and launches it
     bat_content = f"""@echo off
 chcp 65001 >nul
 set _MEIPASS2=
@@ -283,21 +316,47 @@ set _PYI_ARCHIVE_FILE=
 set _PYI_SPLASH_IPC=
 set PYINSTALLER_RESET_ENVIRONMENT=
 set PYINSTALLER_STRICT_UNPACK_MODE=
-timeout /t 2 /nobreak >nul
-:loop
+
+REM Step 1: Force terminate old process and child instances to release OS file locks immediately
+taskkill /f /pid {current_pid} >nul 2>&1
+timeout /t 1 /nobreak >nul
+taskkill /f /im "{target_name}" >nul 2>&1
+
+REM Step 2: Loop until process is completely absent from tasklist
+set /a attempts=0
+:wait_process
+timeout /t 1 /nobreak >nul
+tasklist /fi "pid eq {current_pid}" 2>nul | find /i "{current_pid}" >nul
+if not errorlevel 1 (
+    set /a attempts+=1
+    if %attempts% leq 8 goto wait_process
+)
+
+REM Step 3: Replace target executable with newly downloaded version
+set /a move_attempts=0
+:move_loop
 move /y "{new_exe_path}" "{target_exe}" >nul 2>&1
 if errorlevel 1 (
-    timeout /t 1 /nobreak >nul
-    goto loop
+    set /a move_attempts+=1
+    if %move_attempts% leq 10 (
+        timeout /t 1 /nobreak >nul
+        goto move_loop
+    )
+    copy /y "{new_exe_path}" "{target_exe}" >nul 2>&1
 )
+
+REM Step 4: Restart application cleanly from its true root working directory
+cd /d "{target_dir}"
 start "" "{target_exe}"
+
+REM Step 5: Clean up temporary files
+del "{new_exe_path}" >nul 2>&1
 del "%~f0" >nul 2>&1
 """
 
-    # VBScript runner: WshShell.Run with window style 0 runs cmd.exe 100% INVISIBLE with zero window flash
     vbs_content = (
         'Set WshShell = CreateObject("WScript.Shell")\r\n'
-        f'WshShell.Run "cmd.exe /c """"{bat_path}""""", 0, False\r\n'
+        f'WshShell.Run "cmd.exe /c " & Chr(34) & "{bat_path}" & Chr(34), 0, False\r\n'
         'Set fso = CreateObject("Scripting.FileSystemObject")\r\n'
         'On Error Resume Next\r\n'
         'fso.DeleteFile WScript.ScriptFullName\r\n'
@@ -313,7 +372,6 @@ del "%~f0" >nul 2>&1
             if k.startswith("_PYI") or k.startswith("_MEI") or "PYINSTALLER" in k:
                 clean_env.pop(k, None)
 
-        # wscript.exe is a GUI subsystem process: zero console window ever created
         subprocess.Popen(["wscript.exe", vbs_path], env=clean_env, close_fds=True)
         log("Dispatched silent VBS updater runner. Terminating host application.")
     except Exception as e:

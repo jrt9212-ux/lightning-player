@@ -112,7 +112,7 @@ IS_MAXIMIZED = False
 CLOSING = False
 CLOSING_LOCK = threading.Lock()
 
-APP_VERSION = "1.1.9"
+APP_VERSION = "1.2.0"
 
 UPDATE_STATE = {
     "current_version": APP_VERSION,
@@ -1076,6 +1076,7 @@ def get_cache_path(filename):
         return os.path.join(fallback_dir, filename)
 
 STREAM_CACHE_FILE = get_cache_path("tubefast_cache.json")
+RESOLVE_CACHE_FILE = get_cache_path("tubefast_resolve_cache.json")
 DEAD_TRACKS_FILE = get_cache_path("tubefast_dead.json")
 
 def load_stream_cache():
@@ -1106,6 +1107,24 @@ def save_stream_cache():
     except Exception as e:
         log(f"Stream cache save error: {e}")
 
+def load_resolve_cache():
+    try:
+        if os.path.exists(RESOLVE_CACHE_FILE):
+            with open(RESOLVE_CACHE_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, dict):
+                    RESOLVE_CACHE.update(data)
+            log(f"Loaded {len(RESOLVE_CACHE)} Spotify-to-YouTube resolutions from disk cache")
+    except Exception as e:
+        log(f"Resolve cache load error: {e}")
+
+def save_resolve_cache():
+    try:
+        with open(RESOLVE_CACHE_FILE, "w", encoding="utf-8") as f:
+            json.dump(RESOLVE_CACHE, f)
+    except Exception as e:
+        log(f"Resolve cache save error: {e}")
+
 def load_dead_cache():
     DEAD_TRACK_CACHE.clear()
 
@@ -1114,6 +1133,7 @@ def save_dead_cache():
 
 # Pre-load caches on boot
 load_stream_cache()
+load_resolve_cache()
 
 # Watchdog state for standalone native window
 LAST_HEARTBEAT = time.time()
@@ -1481,13 +1501,10 @@ def get_all_catalog_track_ids():
 FEATURED_TRACK_IDS = get_all_catalog_track_ids()
 load_dead_cache()
 
-YDL_LOCK = threading.Lock()
-_SEARCH_YDL = None
-_STREAM_YDL = None
+THREAD_LOCAL = threading.local()
 
-def get_search_ydl():
-    global _SEARCH_YDL
-    if _SEARCH_YDL is None:
+def get_thread_search_ydl():
+    if not hasattr(THREAD_LOCAL, "search_ydl") or THREAD_LOCAL.search_ydl is None:
         opts = {
             'format': 'bestaudio/best',
             'quiet': True,
@@ -1497,14 +1514,13 @@ def get_search_ydl():
             'ignoreerrors': True,
             'noplaylist': True,
         }
-        _SEARCH_YDL = yt_dlp.YoutubeDL(opts)
-    return _SEARCH_YDL
+        THREAD_LOCAL.search_ydl = yt_dlp.YoutubeDL(opts)
+    return THREAD_LOCAL.search_ydl
 
-def get_stream_ydl():
-    global _STREAM_YDL
-    if _STREAM_YDL is None:
+def get_thread_stream_ydl():
+    if not hasattr(THREAD_LOCAL, "stream_ydl") or THREAD_LOCAL.stream_ydl is None:
         opts = {
-            'format': 'ba[ext=m4a]/140/ba/b[height<=480]/18/best',
+            'format': 'ba[ext=m4a]/140/ba[ext=webm]/ba/b[height<=480]/18/best',
             'quiet': True,
             'no_warnings': True,
             'skip_download': True,
@@ -1512,12 +1528,12 @@ def get_stream_ydl():
             'noplaylist': True,
             'extractor_args': {
                 'youtube': {
-                    'player_client': ['android', 'ios', 'web']
+                    'player_client': ['mweb', 'android', 'ios', 'web']
                 }
             }
         }
-        _STREAM_YDL = yt_dlp.YoutubeDL(opts)
-    return _STREAM_YDL
+        THREAD_LOCAL.stream_ydl = yt_dlp.YoutubeDL(opts)
+    return THREAD_LOCAL.stream_ydl
 
 PRELOAD_QUEUE = deque(maxlen=2)
 PRELOAD_LOCK = threading.Lock()
@@ -1552,11 +1568,10 @@ def preload_worker_loop():
                 time.sleep(0.05)
 
 def search_youtube(query, max_results=15):
-    """Search YouTube catalog via shared yt-dlp instance for minimal RAM footprint."""
+    """Search YouTube catalog via thread-local yt-dlp instance for non-blocking concurrent access."""
     try:
-        with YDL_LOCK:
-            ydl = get_search_ydl()
-            info = ydl.extract_info(f"ytsearch{max_results}:{query}", download=False)
+        ydl = get_thread_search_ydl()
+        info = ydl.extract_info(f"ytsearch{max_results}:{query}", download=False)
         tracks = []
         for e in info.get("entries", []):
             if not e or not e.get("id"):
@@ -1649,21 +1664,21 @@ def search_spotify(query, max_results=15):
         return []
 
 def resolve_spotify_to_yt(title, artist):
-    """Find the matching official audio stream on YouTube for a Spotify track using shared yt-dlp."""
+    """Find the matching official audio stream on YouTube for a Spotify track using thread-local yt-dlp."""
     cache_key = f"{title.lower()} - {artist.lower()}".strip()
     if cache_key in RESOLVE_CACHE:
         return RESOLVE_CACHE[cache_key]
 
     query = f"{title} {artist} official audio"
     try:
-        with YDL_LOCK:
-            ydl = get_search_ydl()
-            info = ydl.extract_info(f"ytsearch3:{query}", download=False)
+        ydl = get_thread_search_ydl()
+        info = ydl.extract_info(f"ytsearch3:{query}", download=False)
         entries = info.get("entries", [])
         for e in entries:
             if e and e.get("id"):
                 vid_id = e.get("id")
                 RESOLVE_CACHE[cache_key] = vid_id
+                save_resolve_cache()
                 log(f"Resolved Spotify track '{title}' -> YouTube ID {vid_id}")
                 return vid_id
     except Exception as e:
@@ -1671,27 +1686,39 @@ def resolve_spotify_to_yt(title, artist):
     return None
 
 def get_audio_stream_url(video_id):
-    """Resolve direct playable audio stream URL using shared multi-client extraction instance."""
+    """Resolve direct playable audio stream URL using thread-local multi-client extraction instance with retry."""
     now = time.time()
     if video_id in STREAM_CACHE:
         url, exp = STREAM_CACHE[video_id]
         if now < exp:
             return url
 
-    try:
-        with YDL_LOCK:
-            ydl = get_stream_ydl()
+    for attempt in range(2):
+        try:
+            ydl = get_thread_stream_ydl()
             info = ydl.extract_info(f"https://www.youtube.com/watch?v={video_id}", download=False)
-        stream_url = info.get("url") if info else None
-        if stream_url:
-            STREAM_CACHE[video_id] = (stream_url, now + (3600 * 5))
-            save_stream_cache()
-            trim_process_memory()
-            return stream_url
-        return None
-    except Exception as e:
-        log(f"Stream resolution failure for {video_id}: {e}")
-        return None
+            stream_url = info.get("url") if info else None
+            # Fallback: scan formats array if info.get('url') is empty
+            if not stream_url and info and "formats" in info:
+                for f in reversed(info["formats"]):
+                    if f.get("acodec") != "none" and f.get("vcodec") == "none" and f.get("url"):
+                        stream_url = f["url"]
+                        break
+                if not stream_url:
+                    for f in reversed(info["formats"]):
+                        if f.get("url") and f.get("acodec") != "none":
+                            stream_url = f["url"]
+                            break
+
+            if stream_url:
+                STREAM_CACHE[video_id] = (stream_url, now + (3600 * 5))
+                save_stream_cache()
+                trim_process_memory()
+                return stream_url
+        except Exception as e:
+            log(f"Stream resolution failure for {video_id} (attempt {attempt+1}): {e}")
+            time.sleep(0.2)
+    return None
 
 def warmup_stream_cache(vid, title="", artist=""):
     """Asynchronously resolve direct stream URL and store in STREAM_CACHE before playback."""
@@ -1808,6 +1835,7 @@ class DualStreamHandler(http.server.SimpleHTTPRequestHandler):
                     self.end_headers()
 
                     # Stream data in 64KB chunks directly into the browser audio engine
+                    first_chunk = True
                     while True:
                         try:
                             chunk = upstream.read(65536)
@@ -1817,6 +1845,9 @@ class DualStreamHandler(http.server.SimpleHTTPRequestHandler):
                             break
                         try:
                             self.wfile.write(chunk)
+                            if first_chunk:
+                                self.wfile.flush()
+                                first_chunk = False
                         except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError):
                             break
                         except Exception as ce:

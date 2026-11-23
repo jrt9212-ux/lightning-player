@@ -2,8 +2,8 @@
 #
 VSVersionInfo(
   ffi=FixedFileInfo(
-    filevers=(1, 1, 9, 0),
-    prodvers=(1, 1, 9, 0),
+    filevers=(1, 2, 0, 0),
+    prodvers=(1, 2, 0, 0),
     mask=0x3f,
     flags=0x0,
     OS=0x40004,
@@ -19,12 +19,12 @@ VSVersionInfo(
           [
             StringStruct('CompanyName', 'Lightning Studios'),
             StringStruct('FileDescription', 'Lightning Player - High Performance Music Player'),
-            StringStruct('FileVersion', '1.1.9.0'),
+            StringStruct('FileVersion', '1.2.0.0'),
             StringStruct('InternalName', 'Lightning Player'),
             StringStruct('LegalCopyright', 'Copyright (C) 2026 Lightning Studios. All rights reserved.'),
             StringStruct('OriginalFilename', 'Lightning Player.exe'),
             StringStruct('ProductName', 'Lightning Player'),
-            StringStruct('ProductVersion', '1.1.9.0')
+            StringStruct('ProductVersion', '1.2.0.0')
           ]
         )
       ]

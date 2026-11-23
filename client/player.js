@@ -27,6 +27,7 @@
     discoverData: null,
     playbackContext: 'discover' // 'discover' | 'playlist' | 'liked' | 'queue'
   };
+  window.__playerState = state;
 
   const STORAGE_KEYS = {
     LIKED: 'tubefast_liked_songs',
@@ -80,9 +81,11 @@
     shuffleBtn: document.getElementById('shuffleBtn'),
     loopBtn: document.getElementById('loopBtn'),
     progressBar: document.getElementById('progressBar'),
+    progressFill: document.getElementById('progressFill'),
     currentTimeLabel: document.getElementById('currentTime'),
     totalTimeLabel: document.getElementById('totalTime'),
     volumeBar: document.getElementById('volumeBar'),
+    volumeFill: document.getElementById('volumeFill'),
     muteBtn: document.getElementById('muteBtn'),
     volIcon: document.getElementById('volIcon'),
     navItems: document.querySelectorAll('.nav-item'),
@@ -105,14 +108,18 @@
     topNav: document.querySelector('.top-nav')
   };
 
-  // Range Slider Fill Utility (--pct for custom CSS progress fill)
+  // Range Slider Fill Utility (Hardware-Accelerated Dual-Layer DOM Fill)
   function updateSliderFill(slider) {
     if (!slider) return;
     const min = parseFloat(slider.min) || 0;
     const max = parseFloat(slider.max) || 100;
     const val = parseFloat(slider.value) || 0;
     const pct = Math.max(0, Math.min(100, ((val - min) / (max - min)) * 100));
-    slider.style.setProperty('--pct', pct + '%');
+    if (slider === elements.progressBar) {
+      if (elements.progressFill) elements.progressFill.style.width = pct + '%';
+    } else if (slider === elements.volumeBar) {
+      if (elements.volumeFill) elements.volumeFill.style.width = pct + '%';
+    }
   }
 
   // Persistent Disk & Local Storage Sync
@@ -1059,26 +1066,46 @@
       }
     }
 
-    // 2. Custom playlist / Liked Songs
-    if (!upcoming && state.activeTab !== 'discover' && state.activeTab !== 'queue' && state.currentList.length > 0) {
-      const curIdx = state.currentList.findIndex(t => t.id === state.currentTrack?.id);
-      if (curIdx !== -1) {
-        for (let i = curIdx + 1; i < state.currentList.length; i++) {
-          const cand = state.currentList[i];
-          if (!cand.unplayable && !deadTracksSet.has(cand.id)) {
-            upcoming = cand;
-            break;
+    // 2. Active List (Category, Playlist, Liked Songs, or Search Results)
+    if (!upcoming && state.currentList && state.currentList.length > 0) {
+      if (state.isShuffling) {
+        // In shuffle mode: pick random unplayed candidate matching active platform
+        const pool = state.currentList.filter(t => !t.unplayable && !deadTracksSet.has(t.id) && (!state.currentTrack || t.id !== state.currentTrack.id) && (!t.source || t.source === state.activeSource));
+        const unplayed = pool.filter(t => !recentPlayedIds.includes(t.id));
+        const candidates = unplayed.length > 0 ? unplayed : pool;
+        if (candidates.length > 0) {
+          upcoming = candidates[Math.floor(Math.random() * candidates.length)];
+        }
+      } else {
+        // Sequential mode: find curIdx and advance
+        const curIdx = state.currentList.findIndex(t => t.id === state.currentTrack?.id);
+        if (curIdx !== -1) {
+          for (let i = curIdx + 1; i < state.currentList.length; i++) {
+            const cand = state.currentList[i];
+            if (!cand.unplayable && !deadTracksSet.has(cand.id) && (!cand.source || cand.source === state.activeSource)) {
+              upcoming = cand;
+              break;
+            }
+          }
+          if (!upcoming && state.isLooping) {
+            for (let i = 0; i <= curIdx; i++) {
+              const cand = state.currentList[i];
+              if (!cand.unplayable && !deadTracksSet.has(cand.id) && (!cand.source || cand.source === state.activeSource)) {
+                upcoming = cand;
+                break;
+              }
+            }
           }
         }
       }
     }
 
-    // 3. Smart Autoplay Queue
+    // 3. Smart Autoplay Queue (Strictly matching active platform)
     if (!upcoming) {
       const currentKey = state.currentTrack ? getSongTitleKey(state.currentTrack.title, state.currentTrack.artist) : '';
       while (smartAutoplayQueue.length > 0) {
         const cand = smartAutoplayQueue[0];
-        if (cand.unplayable || deadTracksSet.has(cand.id) || (currentKey && isDuplicateSongTitle(cand.title, cand.artist, [currentKey]))) {
+        if (cand.unplayable || deadTracksSet.has(cand.id) || (cand.source && cand.source !== state.activeSource) || (currentKey && isDuplicateSongTitle(cand.title, cand.artist, [currentKey]))) {
           smartAutoplayQueue.shift();
         } else {
           upcoming = cand;
@@ -1322,8 +1349,8 @@
 
   // Autonomous Smart Autoplay Trigger (Instantaneous 0ms switch + non-stop playback)
   async function triggerSmartAutoplay() {
-    // 1. Consume from preloaded smart buffer if ready (0ms gapless transition!)
-    if (preloadedTrack && isStandbyReady && !preloadedTrack.unplayable && !deadTracksSet.has(preloadedTrack.id)) {
+    // 1. Consume from preloaded smart buffer if ready and strictly matching active platform
+    if (preloadedTrack && isStandbyReady && !preloadedTrack.unplayable && !deadTracksSet.has(preloadedTrack.id) && (!preloadedTrack.source || preloadedTrack.source === state.activeSource)) {
       const next = preloadedTrack;
       if (smartAutoplayQueue.length > 0 && smartAutoplayQueue[0].id === next.id) {
         smartAutoplayQueue.shift();
@@ -1334,7 +1361,7 @@
 
     while (smartAutoplayQueue.length > 0) {
       const next = smartAutoplayQueue.shift();
-      if (!next.unplayable && !deadTracksSet.has(next.id)) {
+      if (!next.unplayable && !deadTracksSet.has(next.id) && (!next.source || next.source === state.activeSource)) {
         playTrackImmediately(next);
         replenishSmartQueue();
         return;
@@ -1347,30 +1374,30 @@
 
     while (smartAutoplayQueue.length > 0) {
       const next = smartAutoplayQueue.shift();
-      if (!next.unplayable && !deadTracksSet.has(next.id)) {
+      if (!next.unplayable && !deadTracksSet.has(next.id) && (!next.source || next.source === state.activeSource)) {
         playTrackImmediately(next);
         replenishSmartQueue();
         return;
       }
     }
 
-    // 3. Fallback: Category or current list tracks (NEVER hijack into Liked Songs!)
+    // 3. Fallback: Category or current list tracks strictly matching active platform
     if (state.discoverData && state.discoverData.categories) {
       const activeCat = state.discoverData.categories[state.activeCategory]?.tracks || [];
       const pool = activeCat.length > 0 ? activeCat : Object.values(state.discoverData.categories).flatMap(c => c.tracks || []);
-      for (const cand of pool) {
-        if (!cand.unplayable && !deadTracksSet.has(cand.id) && (!state.currentTrack || cand.id !== state.currentTrack.id)) {
-          cand.reason = 'Category Radio';
-          playTrackImmediately(cand);
-          replenishSmartQueue();
-          return;
-        }
+      const candidates = pool.filter(c => (!c.source || c.source === state.activeSource) && (!state.currentTrack || c.id !== state.currentTrack.id) && !deadTracksSet.has(c.id));
+      if (candidates.length > 0) {
+        const cand = candidates[Math.floor(Math.random() * candidates.length)];
+        cand.reason = 'Category Radio';
+        playTrackImmediately(cand);
+        replenishSmartQueue();
+        return;
       }
     }
 
-    if (state.currentList.length > 0) {
+    if (state.currentList && state.currentList.length > 0) {
       for (const cand of state.currentList) {
-        if (!cand.unplayable && !deadTracksSet.has(cand.id) && (!state.currentTrack || cand.id !== state.currentTrack.id)) {
+        if (!cand.unplayable && !deadTracksSet.has(cand.id) && (!cand.source || cand.source === state.activeSource) && (!state.currentTrack || cand.id !== state.currentTrack.id)) {
           playTrackImmediately(cand);
           replenishSmartQueue();
           return;
@@ -1506,25 +1533,7 @@
   function playNextTrack() {
     const currentKey = state.currentTrack ? getSongTitleKey(state.currentTrack.title, state.currentTrack.artist) : '';
 
-    // 1. If we have preloaded and verified the upcoming track on standbyDeck, swap INSTANTLY (0ms gapless transition!)
-    if (preloadedTrack && isStandbyReady && !preloadedTrack.unplayable && !deadTracksSet.has(preloadedTrack.id)) {
-      if (!currentKey || !isDuplicateSongTitle(preloadedTrack.title, preloadedTrack.artist, [currentKey])) {
-        const next = preloadedTrack;
-        if (state.queue.length > 0 && state.queue[0].id === next.id) {
-          state.queue.shift();
-          updateQueueUI();
-        } else if (smartAutoplayQueue.length > 0 && smartAutoplayQueue[0].id === next.id) {
-          smartAutoplayQueue.shift();
-        }
-        executeDeckSwapAndPlay(next);
-        return;
-      } else {
-        preloadedTrack = null;
-        isStandbyReady = false;
-      }
-    }
-
-    // 2. If queue has items, consume from user manual queue (skipping unplayable)
+    // 1. If user manual queue has items, consume from manual queue
     while (state.queue.length > 0) {
       let nextTrack;
       if (state.isShuffling) {
@@ -1535,37 +1544,77 @@
       }
       updateQueueUI();
       if (!nextTrack.unplayable && !deadTracksSet.has(nextTrack.id)) {
-        playTrackImmediately(nextTrack);
+        if (preloadedTrack && isStandbyReady && preloadedTrack.id === nextTrack.id) {
+          executeDeckSwapAndPlay(nextTrack);
+        } else {
+          playTrackImmediately(nextTrack);
+        }
         return;
       }
     }
 
-    // 3. If user is explicitly playing inside a custom playlist or Liked Songs
-    if ((state.playbackContext === 'playlist' || state.playbackContext === 'liked') && state.currentList.length > 0) {
-      let curIdx = state.currentList.findIndex(t => t.id === state.currentTrack?.id);
-      if (curIdx !== -1 && curIdx + 1 < state.currentList.length) {
-        for (let i = curIdx + 1; i < state.currentList.length; i++) {
-          const cand = state.currentList[i];
-          if (!cand.unplayable && !deadTracksSet.has(cand.id)) {
-            playTrackImmediately(cand);
-            return;
+    // 2. Play from Active List (Discover category, Playlist, Liked Songs, or Search)
+    if (state.currentList && state.currentList.length > 0) {
+      if (state.isShuffling) {
+        // True Shuffle Mode: pick a random unplayed track from the active list on current platform
+        const pool = state.currentList.filter(t => !t.unplayable && !deadTracksSet.has(t.id) && (!state.currentTrack || t.id !== state.currentTrack.id) && (!t.source || t.source === state.activeSource));
+        const unplayed = pool.filter(t => !recentPlayedIds.includes(t.id));
+        const candidates = unplayed.length > 0 ? unplayed : pool;
+        if (candidates.length > 0) {
+          const next = candidates[Math.floor(Math.random() * candidates.length)];
+          if (preloadedTrack && isStandbyReady && preloadedTrack.id === next.id) {
+            executeDeckSwapAndPlay(next);
+          } else {
+            playTrackImmediately(next);
+          }
+          return;
+        }
+      } else {
+        // Sequential Mode: step to next index in active list
+        const curIdx = state.currentList.findIndex(t => t.id === state.currentTrack?.id);
+        if (curIdx !== -1) {
+          for (let i = curIdx + 1; i < state.currentList.length; i++) {
+            const cand = state.currentList[i];
+            if (!cand.unplayable && !deadTracksSet.has(cand.id) && (!cand.source || cand.source === state.activeSource)) {
+              if (preloadedTrack && isStandbyReady && preloadedTrack.id === cand.id) {
+                executeDeckSwapAndPlay(cand);
+              } else {
+                playTrackImmediately(cand);
+              }
+              return;
+            }
+          }
+          // Loop list if looping is enabled
+          if (state.isLooping) {
+            for (let i = 0; i <= curIdx; i++) {
+              const cand = state.currentList[i];
+              if (!cand.unplayable && !deadTracksSet.has(cand.id) && (!cand.source || cand.source === state.activeSource)) {
+                if (preloadedTrack && isStandbyReady && preloadedTrack.id === cand.id) {
+                  executeDeckSwapAndPlay(cand);
+                } else {
+                  playTrackImmediately(cand);
+                }
+                return;
+              }
+            }
           }
         }
       }
-      if (state.isLooping && state.currentList.length > 0) {
-        for (let i = 0; i < state.currentList.length; i++) {
-          const cand = state.currentList[i];
-          if (!cand.unplayable && !deadTracksSet.has(cand.id)) {
-            playTrackImmediately(cand);
-            return;
-          }
-        }
-      }
-      // When playlist reaches the end, gracefully exit playlist context and flow into Smart Radio autoplay!
-      state.playbackContext = 'discover';
     }
 
-    // 4. Intelligent Autoplay: play similar/recommended song tailored to taste profile
+    // 3. Fallback: If preloadedTrack on standbyDeck is verified playable and matches active platform
+    if (preloadedTrack && isStandbyReady && !preloadedTrack.unplayable && !deadTracksSet.has(preloadedTrack.id) && (!preloadedTrack.source || preloadedTrack.source === state.activeSource)) {
+      if (!currentKey || !isDuplicateSongTitle(preloadedTrack.title, preloadedTrack.artist, [currentKey])) {
+        const next = preloadedTrack;
+        if (smartAutoplayQueue.length > 0 && smartAutoplayQueue[0].id === next.id) {
+          smartAutoplayQueue.shift();
+        }
+        executeDeckSwapAndPlay(next);
+        return;
+      }
+    }
+
+    // 4. Intelligent Autoplay: play similar/recommended track strictly on selected platform
     triggerSmartAutoplay();
   }
 
@@ -1575,10 +1624,32 @@
       return;
     }
 
-    if (state.currentList.length > 0) {
-      let curIdx = state.currentList.findIndex(t => t.id === state.currentTrack?.id);
-      let prevIdx = (curIdx - 1 + state.currentList.length) % state.currentList.length;
-      playTrackImmediately(state.currentList[prevIdx]);
+    // 1. If recentPlayedIds has previous tracks, go back to previously played song
+    if (recentPlayedIds.length > 1) {
+      const prevId = recentPlayedIds[1];
+      const cand = (state.currentList && state.currentList.find(t => t.id === prevId)) ||
+                   (state.discoverData && state.discoverData.categories && Object.values(state.discoverData.categories).flatMap(c => c.tracks || []).find(t => t.id === prevId));
+      if (cand) {
+        playTrackImmediately(cand);
+        return;
+      }
+    }
+
+    // 2. Otherwise step backward in currentList
+    if (state.currentList && state.currentList.length > 0) {
+      const curIdx = state.currentList.findIndex(t => t.id === state.currentTrack?.id);
+      if (curIdx > 0) {
+        for (let i = curIdx - 1; i >= 0; i--) {
+          const cand = state.currentList[i];
+          if (!cand.unplayable && !deadTracksSet.has(cand.id)) {
+            playTrackImmediately(cand);
+            return;
+          }
+        }
+      } else if (state.isLooping && state.currentList.length > 0) {
+        playTrackImmediately(state.currentList[state.currentList.length - 1]);
+        return;
+      }
     }
   }
 
@@ -1908,27 +1979,51 @@
     elements.progressBar.addEventListener('touchstart', () => { state.isScrubbing = true; });
 
     elements.progressBar.addEventListener('input', (e) => {
+      const pct = parseFloat(e.target.value) || 0;
+      if (elements.progressFill) elements.progressFill.style.width = pct + '%';
       const dur = elements.audioEngine.duration || 0;
-      if (dur > 0) {
-        const target = (parseFloat(e.target.value) / 100) * dur;
+      if (dur > 0 && isFinite(dur)) {
+        const target = (pct / 100) * dur;
         elements.currentTimeLabel.textContent = formatTime(target);
       }
-      updateSliderFill(e.target);
     });
 
     elements.progressBar.addEventListener('change', (e) => {
+      const pct = parseFloat(e.target.value) || 0;
+      if (elements.progressFill) elements.progressFill.style.width = pct + '%';
       const dur = elements.audioEngine.duration || 0;
-      if (dur > 0) {
-        const target = (parseFloat(e.target.value) / 100) * dur;
+      if (dur > 0 && isFinite(dur)) {
+        const target = (pct / 100) * dur;
         elements.audioEngine.currentTime = target;
       }
-      updateSliderFill(e.target);
       state.isScrubbing = false;
     });
 
+    // Global release to guarantee scrubber state never locks up
+    window.addEventListener('mouseup', () => { state.isScrubbing = false; });
+    window.addEventListener('touchend', () => { state.isScrubbing = false; });
+
+    // Category Pill Bar: Lock vertical scroll to 0 and redirect mouse wheel horizontally
+    if (elements.categoryPillBar) {
+      elements.categoryPillBar.scrollTop = 0;
+      elements.categoryPillBar.addEventListener('scroll', () => {
+        if (elements.categoryPillBar.scrollTop !== 0) {
+          elements.categoryPillBar.scrollTop = 0;
+        }
+      });
+      elements.categoryPillBar.addEventListener('wheel', (e) => {
+        if (e.deltaY !== 0) {
+          e.preventDefault();
+          elements.categoryPillBar.scrollLeft += e.deltaY;
+        }
+      }, { passive: false });
+    }
+
     // Volume
     elements.volumeBar.addEventListener('input', (e) => {
-      setVolume(parseInt(e.target.value, 10));
+      const vol = parseInt(e.target.value, 10);
+      if (elements.volumeFill) elements.volumeFill.style.width = vol + '%';
+      setVolume(vol);
     });
 
     elements.muteBtn.addEventListener('click', toggleMute);

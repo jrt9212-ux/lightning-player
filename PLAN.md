@@ -1,20 +1,19 @@
-# PLAN.md — custom online streaming player (youtube & spotify routing)
+# PLAN.md — Reliable Multi-Platform Routing, Audio Streaming Engine & UI Precision
 
 1. `research_notes.md` — findings from the search gate, with source URLs.
-2. `app.py` — discover endpoint stability & autoplay policy (v1.1.9):
-   - Replaced unhandled `concurrent.futures.as_completed` timeout loop with `concurrent.futures.wait(..., timeout=3.5)` in `get_smart_recommendations`, preventing `TimeoutError` from crashing the server with `net::ERR_EMPTY_RESPONSE`.
-   - Wrapped `/api/discover` in a robust try-except with instant fallback to catalog categories so the UI can never fail to receive categories.
-   - Added `Cache-Control: no-cache, no-store, must-revalidate` headers in `DualStreamHandler.end_headers()` to prevent WebView2 from serving stale cached CSS/JS.
-   - Added `--autoplay-policy=no-user-gesture-required` to WebView2 arguments and native window launcher.
-3. `client/index.html` — asset cache busting (v1.1.9):
-   - Appended `?v=1.1.9` query parameters to `style.css` and `player.js` references.
-4. `client/style.css` — category pills layout & boundary clipping fix (v1.1.9):
-   - `.category-pill-bar`: `min-height: 64px`, `overflow-x: auto`, `overflow-y: hidden`, `padding: 12px 6px 14px 6px`, `box-sizing: border-box`.
-   - `.category-pill`: `height: 38px`, `line-height: 38px`, `padding: 0 18px`, `border: 1.5px solid rgba(255, 255, 255, 0.08)`, `border-radius: 9999px`.
-   - `.category-pill.active`: `border: 1.5px solid #38bdf8`, `box-shadow: 0 0 14px rgba(14, 165, 233, 0.3)`.
-5. `client/player.js` — autoplay & abort error handling (v1.1.9):
-   - Caught `AbortError` / code 20 and `NotAllowedError` in audio play promises to eliminate auto-skip cascades.
-   - Guarded stall watchdog (`cur > 0.5`) to prevent premature aborts on initial network connections.
-   - Separated `playbackContext` ('discover' | 'playlist' | 'liked' | 'queue') so discover playback never falls back to sequential liked songs stepping.
-6. `compile and package` — compiled with PyInstaller (`TubeFast.spec`), replaced root `Lightning Player.exe`, and generated `Lightning-Player-v1.1.9-Windows-x64.zip`.
-7. `test_verification.md` — test verification report.
+2. `client/index.html` & `client/style.css` — precision UI overhaul:
+   - Progress Bar Inconsistency Fix: Replace dirty-rect custom property linear-gradient on `<input type="range">` with a dual-layer hardware-accelerated progress bar: dedicated `.slider-progress-fill` element (`#progressFill`) inside `.slider-track-wrap` with transparent input on top. Zero repaint glitches, zero gaps, 100% synchronized with playback and scrubbing.
+   - Volume Slider Sizing: Expand volume slider box to 180px and input width to 140px with a dedicated volume fill layer, giving feasible, high-precision audio control.
+   - Category Pill Bar Fix: Lock `.category-pill-bar` vertical scroll (`scrollTop = 0`), redirect mouse wheel events to horizontal `scrollLeft`, and set clean headroom padding (`padding: 10px 12px; height: 58px`) so pills are never clipped or cut off at the top.
+3. `app.py` — thread-local extraction, multi-client streaming engine & disk resolve cache:
+   - Replace singleton `YDL_LOCK` with `threading.local()` multi-client extractor (`mweb,android,ios,web` and `ba[ext=m4a]/140/ba[ext=webm]/ba/best`) eliminating lock contention between simultaneous `/api/stream`, `/api/preload`, and `/api/recommendations`.
+   - Persist Spotify-to-YouTube video ID resolution cache to `tubefast_resolve_cache.json` on disk across app restarts, enabling 0ms instant playback for repeated or pre-cached tracks.
+   - Stream chunk flush (`self.wfile.flush()`) on first byte chunk for immediate audio playback start without waiting for TCP buffer fill.
+   - Bump `APP_VERSION = "1.2.0"`.
+4. `client/player.js` — strict platform routing, smart shuffle & skip consistency:
+   - Platform Context Isolation: When YouTube mode is active, all search, autoplay, smart queue, and recommendations route exclusively through YouTube tracks (`source === 'youtube'`). When Spotify mode is active, all recommendations and queueing route exclusively through Spotify tracks (`source === 'spotify'`).
+   - Overhaul Shuffle & Skip: Implement unplayed candidate pool per platform so shuffle next/skip draws random unplayed tracks without repetition within 50 tracks. When shuffle is off, step sequentially through active category list.
+   - Preloader Synchronization: Sync preloaded track with intended next track (random for shuffle, next sequential for linear).
+   - Dynamic Progress Fill Sync: Direct DOM update of `#progressFill` width on `timeupdate`, `input`, and `change`.
+5. `compile and package` — compile standalone `Lightning Player.exe` via PyInstaller, update `version_info.txt` to 1.2.0.0, package `Lightning-Player-v1.2.0-Windows-x64.zip`.
+6. `test_verification.md` — end-to-end Edge CDP verification confirming category pills rendered cleanly without clipping, progress fill and volume slider pixel accuracy, and uninterrupted multi-platform playback.
